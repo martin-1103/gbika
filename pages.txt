@@ -1,0 +1,155 @@
+# 🌐 Website Remake — El Shaddai FM
+
+## 📑 Sitemap & Halaman Utama
+
+### 1. **Homepage**
+
+**Summary:**
+
+* Hero Section: Live streaming player, tombol "Doa Online", highlight program.
+* Jadwal siaran singkat (hari ini & besok).
+* Renungan terbaru (3 artikel).
+* Call-to-action: Doa, Request Lagu.
+
+---
+
+### 2. **Tentang Kami**
+
+**Summary:**
+
+* Sejarah El Shaddai FM (2001–sekarang).
+* Visi & misi pelayanan.
+* Profil penyiar & tim.
+* Slogan & nilai inti.
+
+---
+
+### 3. **Program & Jadwal Siaran**
+
+**Summary:**
+
+* Daftar program mingguan.
+* Highlight program unggulan (Gerasa, Mujizat Setiap Hari, Doa Online).
+* Kalender event ibadah atau kegiatan jemaat.
+
+---
+
+### 4. **Renungan & Artikel**
+
+**Summary:**
+
+* Renungan harian.
+* Artikel rohani keluarga, pemuda, doa.
+* Arsip renungan (filter berdasarkan kategori/tanggal).
+
+---
+
+### 5. **Doa Online & Request Lagu**
+
+**Summary:**
+
+* Form permohonan doa (langsung terkirim ke admin/pelayan doa).
+* Form request lagu (tersambung ke WhatsApp/Email backend).
+* Info layanan doa 24 jam.
+
+---
+
+### 6. **Kesaksian**
+
+**Summary:**
+
+* Kisah nyata jemaat/pendengar yang mengalami perubahan hidup.
+* Video/audio kesaksian singkat.
+* Form untuk mengirimkan kesaksian jemaat.
+
+---
+
+### 7. **Galeri**
+
+**Summary:**
+
+* Foto-foto kegiatan El Shaddai FM.
+* Video highlight pelayanan.
+
+---
+
+### 8. **Membership (Partnership Program)**
+
+**Summary:**
+
+* **Program Partnership El-Shaddai Two in One** - kesempatan istimewa bagi pendengar dan jemaat untuk turut serta dalam pelayanan dan pengembangan Radio El-Shaddai Two in One.
+* **Tipe Partner:**
+  - **Partner Basic**: Rp 500.000 - Rp 1.000.000 (tiap bulan)
+  - **Partner VIP**: Rp 1.000.001 - Rp 2.000.000 (tiap bulan)
+  - **Partner VVIP**: Di atas Rp 2.000.000 (tiap bulan)
+* **Benefit Partner:**
+  - ID Card Partner Radio El-Shaddai Two in One
+  - Update berkala perkembangan radio (kesaksian, kegiatan, dll)
+  - Undangan khusus event radio
+  - Doa spesial ulang tahun (Basic: dari hamba Tuhan, VIP: dari hamba Tuhan Keluarga Allah, VVIP: dari Senior Pastor Keluarga Allah)
+  - Special discount beriklan di radio (Basic: 5%, VIP: 10%, VVIP: 15%)
+  - Kursi khusus dalam acara perayaan/KKR (Basic: khusus Basic, VIP: khusus VIP, VVIP: khusus VVIP)
+  - Assistensi khusus dari customer service priority untuk pengurus gereja
+  - Akses program radio analog & digital (khusus VVIP)
+* **Form registrasi partnership** (muncul saat diklik "Mari Bergabung!").
+* **Kontak:** 0855 2822 777 untuk informasi lebih lanjut.
+
+---
+
+### 9. **Suara Pendengar (Live Text ke Penyiar)**
+
+**Summary:**
+
+* **Form data pengirim** wajib diisi sebelum mengirim pesan: nama, kota, negara (disimpan di cookies, tidak perlu isi ulang jika sudah ada).
+* **Kirim pesan teks realtime** dari pendengar ke admin/penyiar (WebSocket/Socket.IO).
+* Fitur captcha anti-spam, rate-limit per akun/IP.
+* **Moderasi cepat**: auto-filter kata sensitif, keyword highlight ("permohonan doa", "request lagu").
+
+* Riwayat percakapan per user, pencarian & filter.
+
+**Integrasi:**
+
+* Widget "Suara Pendengar Hari Ini" di Homepage (pesan yang tampil sudah melalui moderasi admin).
+* **Admin Panel**.
+
+**Catatan Teknis Singkat:**
+
+* Backend: NestJS + WebSocket Gateway; Redis Pub/Sub untuk skala.
+* Persistensi: PostgreSQL (tabel messages, threads, participants, tags).
+* Keamanan: JWT/Session untuk member; guest allowed + hCaptcha.
+
+---
+
+### 10. **Penyiar Login & Dashboard** *(role khusus)*
+
+**Summary:**
+
+* **Login penyiar** terpisah (role-based access control: Penyiar, Admin, Editor).
+* **Inbox Realtime**: daftar pesan masuk, filter per program/sesi, indikator online/typing.
+* **Panel On-Air**: mode fokus saat siaran (teks besar, highlight request/permohonan doa, tombol "Pin ke On-Air").
+* **Balas Pesan**: teks cepat, template, mark as read, assign ke penyiar lain.
+* **Moderasi**: approve/hold/hide pesan, block user sementara.
+* **Analitik Ringkas**: jumlah pesan per sesi, topik populer, waktu sibuk.
+
+---
+
+### 11. **Kontak Kami**
+
+**Summary:**
+
+* Telepon office & on-air.
+* WhatsApp marketing & hotline doa.
+* Email & alamat kantor.
+* Peta lokasi (Google Maps embed).
+
+---
+
+### 12. **Admin Panel (Backoffice)** *(hanya internal)*
+
+**Summary:**
+
+* Login admin & content manager; manajemen role (Admin, Editor, Penyiar).
+* CRUD konten (renungan, artikel, jadwal siaran, kesaksian, membership).
+* **Manajemen Suara Pendengar**: moderasi massal, arsip, ekspor CSV, template quick replies.
+* Upload audio/video podcast.
+* Statistik visitor, request doa/lagu, dan metrik pesan masuk (per program/penyiar).
