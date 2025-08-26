@@ -29,7 +29,7 @@ export const softDeleteArticle = async (slug: string): Promise<boolean> => {
     });
 
     return true;
-  } catch (error) {
+  } catch (error: any) {
     if (error.code === 'P2025') { // Prisma's record not found error
       return false;
     }

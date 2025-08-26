@@ -8,7 +8,7 @@
 - [ ] articles/delete-article-DELETE-articles_slug.md (priority 52)
 - [x] auth/admin-login-POST-auth_login.md (priority 1)
 - [x] auth/admin-logout-POST-auth_logout.md (priority 2)
-- [ ] auth/get-user-profile-GET-auth_me.md (priority 3)
+- [x] auth/get-user-profile-GET-auth_me.md (priority 3)
 - [ ] gallery/list-gallery-items-GET-gallery.md (priority 35)
 - [ ] gallery/upload-gallery-item-POST-gallery.md (priority 53)
 - [ ] gallery/update-gallery-item-PUT-gallery_id.md (priority 54)

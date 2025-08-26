@@ -552,3 +552,798 @@ const config = {
 - **Health Checks**: Application monitoring
 - **Graceful Shutdown**: Connection cleanup
 - **Log Rotation**: File size management
+
+## Implementation Roadmap
+
+### Phase 1: Foundation (Priority 1-10)
+```mermaid
+gantt
+    title Implementation Timeline
+    dateFormat  YYYY-MM-DD
+    section Authentication
+    Admin Login           :active, auth1, 2024-01-01, 3d
+    Admin Logout          :auth2, after auth1, 2d
+    User Profile          :auth3, after auth2, 2d
+    section Core Pages
+    Homepage Data         :pages1, after auth1, 3d
+    Page Content          :pages2, after pages1, 2d
+    section Live Chat
+    Session Management    :chat1, after auth3, 4d
+    WebSocket Connection  :chat2, after chat1, 3d
+    Message Moderation    :chat3, after chat2, 2d
+```
+
+### Phase 2: Content Management (Priority 20-30)
+- Article CRUD operations
+- Program schedule management
+- Basic content caching
+
+### Phase 3: User Interaction (Priority 35-45)
+- Gallery management
+- Membership system
+- Service request handling
+
+### Phase 4: Advanced Features (Priority 50+)
+- Advanced article management
+- Complete gallery operations
+- Performance optimization
+
+## Database Schema Implementation
+
+### Core Tables Structure
+```sql
+-- Users table
+CREATE TABLE users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  role ENUM('admin', 'editor', 'penyiar') DEFAULT 'editor',
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_email (email),
+  INDEX idx_role (role)
+);
+
+-- Categories table
+CREATE TABLE categories (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  slug VARCHAR(255) UNIQUE NOT NULL,
+  description TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_slug (slug)
+);
+
+-- Articles table
+CREATE TABLE articles (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(500) NOT NULL,
+  slug VARCHAR(500) UNIQUE NOT NULL,
+  content LONGTEXT NOT NULL,
+  excerpt TEXT,
+  status ENUM('draft', 'published', 'archived') DEFAULT 'draft',
+  author_id INT NOT NULL,
+  category_id INT,
+  featured_image VARCHAR(500),
+  published_at TIMESTAMP NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL,
+  INDEX idx_slug (slug),
+  INDEX idx_status (status),
+  INDEX idx_author (author_id),
+  INDEX idx_published (published_at),
+  FULLTEXT idx_content (title, content, excerpt)
+);
+
+-- Gallery table
+CREATE TABLE gallery (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  filename VARCHAR(255) NOT NULL,
+  original_filename VARCHAR(255) NOT NULL,
+  filepath VARCHAR(500) NOT NULL,
+  mimetype VARCHAR(100) NOT NULL,
+  size INT NOT NULL,
+  width INT,
+  height INT,
+  uploaded_by INT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (uploaded_by) REFERENCES users(id) ON DELETE CASCADE,
+  INDEX idx_uploaded_by (uploaded_by),
+  INDEX idx_mimetype (mimetype)
+);
+
+-- Chat sessions table
+CREATE TABLE chat_sessions (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  session_id VARCHAR(255) UNIQUE NOT NULL,
+  user_identifier VARCHAR(255),
+  ip_address VARCHAR(45),
+  user_agent TEXT,
+  is_active BOOLEAN DEFAULT TRUE,
+  started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  ended_at TIMESTAMP NULL,
+  INDEX idx_session_id (session_id),
+  INDEX idx_is_active (is_active)
+);
+
+-- Chat messages table
+CREATE TABLE chat_messages (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  session_id VARCHAR(255) NOT NULL,
+  message TEXT NOT NULL,
+  username VARCHAR(100),
+  is_moderated BOOLEAN DEFAULT FALSE,
+  is_hidden BOOLEAN DEFAULT FALSE,
+  moderated_by INT NULL,
+  moderated_at TIMESTAMP NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (moderated_by) REFERENCES users(id) ON DELETE SET NULL,
+  INDEX idx_session_id (session_id),
+  INDEX idx_created_at (created_at),
+  INDEX idx_moderation (is_moderated, is_hidden)
+);
+```
+
+## API Response Standards
+
+### Success Response Format
+```typescript
+interface SuccessResponse<T> {
+  success: true
+  data: T
+  message?: string
+  pagination?: {
+    page: number
+    limit: number
+    total: number
+    totalPages: number
+    hasNext: boolean
+    hasPrev: boolean
+  }
+  meta?: {
+    timestamp: string
+    requestId: string
+    version: string
+  }
+}
+```
+
+### Error Response Format
+```typescript
+interface ErrorResponse {
+  success: false
+  error: {
+    code: string
+    message: string
+    details?: any
+    field?: string
+    timestamp: string
+    requestId: string
+  }
+}
+```
+
+### HTTP Status Code Standards
+- **200 OK**: Successful GET, PUT operations
+- **201 Created**: Successful POST operations
+- **204 No Content**: Successful DELETE operations
+- **400 Bad Request**: Invalid request format
+- **401 Unauthorized**: Authentication required
+- **403 Forbidden**: Insufficient permissions
+- **404 Not Found**: Resource not found
+- **422 Unprocessable Entity**: Validation errors
+- **429 Too Many Requests**: Rate limit exceeded
+- **500 Internal Server Error**: Server errors
+
+## Validation Schemas
+
+### Authentication Schemas
+```typescript
+// Login validation
+const loginSchema = z.object({
+  email: z.string().email('Invalid email format'),
+  password: z.string().min(8, 'Password must be at least 8 characters')
+})
+
+// User profile update
+const updateProfileSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters').optional(),
+  email: z.string().email('Invalid email format').optional()
+})
+```
+
+### Article Schemas
+```typescript
+// Article creation
+const createArticleSchema = z.object({
+  title: z.string().min(5, 'Title must be at least 5 characters').max(500),
+  content: z.string().min(10, 'Content must be at least 10 characters'),
+  slug: z.string().regex(/^[a-z0-9-]+$/, 'Invalid slug format').optional(),
+  status: z.enum(['draft', 'published']).default('draft'),
+  category_id: z.number().int().positive().optional(),
+  excerpt: z.string().max(500).optional(),
+  featured_image: z.string().url().optional()
+})
+
+// Article update
+const updateArticleSchema = createArticleSchema.partial()
+
+// Article query filters
+const articleFiltersSchema = z.object({
+  page: z.number().int().min(1).default(1),
+  limit: z.number().int().min(1).max(50).default(10),
+  status: z.enum(['draft', 'published', 'archived']).optional(),
+  category: z.string().optional(),
+  search: z.string().max(100).optional(),
+  author: z.number().int().positive().optional(),
+  sortBy: z.enum(['created_at', 'updated_at', 'published_at', 'title']).default('created_at'),
+  sortOrder: z.enum(['asc', 'desc']).default('desc')
+})
+```
+
+### File Upload Schemas
+```typescript
+// Gallery upload validation
+const galleryUploadSchema = z.object({
+  title: z.string().min(2, 'Title must be at least 2 characters').max(255),
+  description: z.string().max(1000).optional()
+})
+
+// File validation middleware
+const validateImageUpload = (file: Express.Multer.File) => {
+  const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+  const maxSize = 5 * 1024 * 1024 // 5MB
+  
+  if (!allowedMimeTypes.includes(file.mimetype)) {
+    throw new Error('Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed.')
+  }
+  
+  if (file.size > maxSize) {
+    throw new Error('File size too large. Maximum size is 5MB.')
+  }
+  
+  return true
+}
+```
+
+## Real-time Features Implementation
+
+### Socket.IO Event Handling
+```typescript
+// Chat event handlers
+interface ChatEvents {
+  // Client to server events
+  'join-room': (sessionId: string) => void
+  'send-message': (data: { message: string; username?: string }) => void
+  'leave-room': (sessionId: string) => void
+  
+  // Server to client events
+  'user-joined': (data: { username: string; timestamp: string }) => void
+  'new-message': (data: ChatMessage) => void
+  'message-moderated': (data: { messageId: string; action: 'hide' | 'delete' }) => void
+  'user-left': (data: { username: string; timestamp: string }) => void
+  'error': (data: { message: string; code: string }) => void
+}
+
+// Song request events
+interface SongRequestEvents {
+  'new-song-request': (data: SongRequest) => void
+  'request-approved': (data: { requestId: string; approvedBy: string }) => void
+  'request-rejected': (data: { requestId: string; reason: string }) => void
+}
+```
+
+### WebSocket Connection Management
+```typescript
+class SocketManager {
+  private io: Server
+  private redis: Redis
+  private activeSessions: Map<string, Set<string>> = new Map()
+  
+  constructor(server: http.Server, redisClient: Redis) {
+    this.io = new Server(server, {
+      cors: {
+        origin: process.env.FRONTEND_URL,
+        methods: ['GET', 'POST']
+      },
+      transports: ['websocket', 'polling']
+    })
+    
+    this.redis = redisClient
+    this.setupEventHandlers()
+  }
+  
+  private setupEventHandlers() {
+    this.io.on('connection', (socket) => {
+      socket.on('join-room', (sessionId: string) => {
+        socket.join(sessionId)
+        this.addToActiveSession(sessionId, socket.id)
+      })
+      
+      socket.on('send-message', async (data) => {
+        const sessionId = this.getSessionFromSocket(socket)
+        if (sessionId) {
+          await this.handleNewMessage(sessionId, data, socket)
+        }
+      })
+      
+      socket.on('disconnect', () => {
+        this.removeFromActiveSessions(socket.id)
+      })
+    })
+  }
+  
+  private async handleNewMessage(
+    sessionId: string, 
+    data: { message: string; username?: string }, 
+    socket: Socket
+  ) {
+    // Rate limiting check
+    const rateLimitKey = `chat_rate:${socket.handshake.address}`
+    const currentCount = await this.redis.incr(rateLimitKey)
+    
+    if (currentCount === 1) {
+      await this.redis.expire(rateLimitKey, 60) // 1 minute window
+    }
+    
+    if (currentCount > 100) { // 100 messages per minute
+      socket.emit('error', {
+        message: 'Rate limit exceeded. Please slow down.',
+        code: 'RATE_LIMIT_EXCEEDED'
+      })
+      return
+    }
+    
+    // Save message to database
+    const message = await this.saveMessage(sessionId, data)
+    
+    // Broadcast to room
+    this.io.to(sessionId).emit('new-message', message)
+    
+    // Publish to Redis for multi-instance sync
+    await this.redis.publish('chat_messages', JSON.stringify({
+      sessionId,
+      message
+    }))
+  }
+}
+```
+
+## Monitoring & Health Checks
+
+### Application Health Endpoint
+```typescript
+// Health check implementation
+app.get('/health', async (req, res) => {
+  const health = {
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    version: process.env.APP_VERSION || '1.0.0',
+    uptime: process.uptime(),
+    services: {
+      database: 'unknown',
+      redis: 'unknown',
+      filesystem: 'unknown'
+    }
+  }
+  
+  try {
+    // Database health check
+    await prisma.$queryRaw`SELECT 1`
+    health.services.database = 'healthy'
+  } catch (error) {
+    health.services.database = 'unhealthy'
+    health.status = 'unhealthy'
+  }
+  
+  try {
+    // Redis health check
+    await redis.ping()
+    health.services.redis = 'healthy'
+  } catch (error) {
+    health.services.redis = 'unhealthy'
+    health.status = 'unhealthy'
+  }
+  
+  try {
+    // Filesystem health check
+    await fs.access(process.env.UPLOAD_PATH || './uploads', fs.constants.W_OK)
+    health.services.filesystem = 'healthy'
+  } catch (error) {
+    health.services.filesystem = 'unhealthy'
+    health.status = 'unhealthy'
+  }
+  
+  const statusCode = health.status === 'healthy' ? 200 : 503
+  res.status(statusCode).json(health)
+})
+```
+
+### Performance Metrics
+```typescript
+// Request timing middleware
+const requestTiming = (req: Request, res: Response, next: NextFunction) => {
+  const start = Date.now()
+  
+  res.on('finish', () => {
+    const duration = Date.now() - start
+    const route = req.route?.path || req.path
+    
+    // Log slow requests (>1s)
+    if (duration > 1000) {
+      logger.warn('Slow request detected', {
+        method: req.method,
+        route,
+        duration,
+        statusCode: res.statusCode,
+        userAgent: req.get('User-Agent'),
+        ip: req.ip
+      })
+    }
+    
+    // Store metrics in Redis for monitoring
+    redis.lpush('api_metrics', JSON.stringify({
+      method: req.method,
+      route,
+      duration,
+      statusCode: res.statusCode,
+      timestamp: new Date().toISOString()
+    }))
+    
+    // Keep only last 1000 metrics
+    redis.ltrim('api_metrics', 0, 999)
+  })
+  
+  next()
+}
+```
+
+## Git Integration & Deployment
+
+### Git Workflow
+Given the project repository at `https://github.com/martin-1103/gbika.git`, ensure proper authentication setup:
+
+```bash
+# Configure Git with correct credentials
+git config user.name "martin-1103"
+git config user.email "martin@example.com"
+
+# Set up remote with authentication
+git remote set-url origin https://martin-1103@github.com/martin-1103/gbika.git
+```
+
+### CI/CD Pipeline Structure
+```yaml
+# .github/workflows/deploy.yml
+name: Deploy Backend API
+
+on:
+  push:
+    branches: [main]
+    paths: ['be/**']
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+      - run: cd be && npm ci
+      - run: cd be && npm run test
+      - run: cd be && npm run build
+  
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Deploy to production
+        run: |
+          # Deploy script here
+          pm2 restart ecosystem.config.js --env production
+```
+
+### Production Configuration
+```javascript
+// ecosystem.config.js for PM2
+module.exports = {
+  apps: [{
+    name: 'elshaddai-api',
+    script: 'dist/server.js',
+    instances: 'max',
+    exec_mode: 'cluster',
+    env: {
+      NODE_ENV: 'development',
+      PORT: 3000
+    },
+    env_production: {
+      NODE_ENV: 'production',
+      PORT: 3000
+    },
+    error_file: './logs/err.log',
+    out_file: './logs/out.log',
+    log_file: './logs/combined.log',
+    time: true,
+    max_memory_restart: '1G',
+    node_args: '--max-old-space-size=1024'
+  }]
+}
+```
+
+## Complete Service Layer Architecture
+
+### Authentication Service Implementation
+```typescript
+// services/auth.service.ts
+export class AuthService {
+  constructor(private prisma: PrismaClient, private redis: Redis) {}
+
+  async login(email: string, password: string): Promise<LoginResponse> {
+    // Rate limiting implementation
+    const rateLimitKey = `login_attempts:${email}`
+    const attempts = await this.redis.incr(rateLimitKey)
+    
+    if (attempts === 1) {
+      await this.redis.expire(rateLimitKey, 900) // 15 minutes
+    }
+    
+    if (attempts > 5) {
+      throw new Error('Too many login attempts. Please try again later.')
+    }
+
+    // User validation
+    const user = await this.prisma.user.findUnique({
+      where: { email, is_active: true },
+      select: { id: true, email: true, password_hash: true, name: true, role: true }
+    })
+
+    if (!user || !await bcrypt.compare(password, user.password_hash)) {
+      throw new Error('Invalid email or password')
+    }
+
+    // Generate JWT and store session
+    const token = this.generateJWT({ sub: user.id, email: user.email, role: user.role })
+    await this.redis.setex(`session:${token}`, 3600, JSON.stringify(user))
+    await this.redis.del(rateLimitKey) // Reset on success
+
+    return {
+      accessToken: token,
+      user: { id: user.id, name: user.name, email: user.email, role: user.role }
+    }
+  }
+
+  async validateToken(token: string): Promise<User | null> {
+    const isBlacklisted = await this.redis.exists(`blacklist:${token}`)
+    if (isBlacklisted) return null
+
+    try {
+      const payload = jwt.verify(token, process.env.JWT_SECRET!) as JWTPayload
+      const session = await this.redis.get(`session:${token}`)
+      if (!session) return null
+
+      return await this.prisma.user.findUnique({
+        where: { id: payload.sub, is_active: true }
+      })
+    } catch {
+      return null
+    }
+  }
+
+  private generateJWT(payload: JWTPayload): string {
+    return jwt.sign(payload, process.env.JWT_SECRET!, {
+      expiresIn: '1h',
+      issuer: 'elshaddai-api'
+    })
+  }
+}
+```
+
+### Article Service Implementation
+```typescript
+// services/article.service.ts
+export class ArticleService {
+  constructor(private prisma: PrismaClient) {}
+
+  async createArticle(data: CreateArticleDto, authorId: number): Promise<Article> {
+    const slug = data.slug || await this.generateUniqueSlug(data.title)
+    
+    return await this.prisma.article.create({
+      data: {
+        title: data.title,
+        slug,
+        content: DOMPurify.sanitize(data.content),
+        excerpt: data.excerpt || this.generateExcerpt(data.content),
+        status: data.status || 'draft',
+        author_id: authorId,
+        category_id: data.category_id,
+        published_at: data.status === 'published' ? new Date() : null
+      },
+      include: {
+        author: { select: { id: true, name: true } },
+        category: { select: { id: true, name: true, slug: true } }
+      }
+    })
+  }
+
+  async getArticles(filters: ArticleFilters): Promise<PaginatedResult<Article>> {
+    const where = this.buildWhereClause(filters)
+    const [articles, total] = await Promise.all([
+      this.prisma.article.findMany({
+        where,
+        orderBy: { [filters.sortBy]: filters.sortOrder },
+        skip: (filters.page - 1) * filters.limit,
+        take: filters.limit,
+        include: { author: true, category: true }
+      }),
+      this.prisma.article.count({ where })
+    ])
+
+    return {
+      data: articles,
+      pagination: {
+        page: filters.page,
+        limit: filters.limit,
+        total,
+        totalPages: Math.ceil(total / filters.limit),
+        hasNext: filters.page * filters.limit < total,
+        hasPrev: filters.page > 1
+      }
+    }
+  }
+
+  private async generateUniqueSlug(title: string): Promise<string> {
+    let baseSlug = slugify(title, { lower: true, strict: true })
+    let slug = baseSlug
+    let counter = 1
+
+    while (await this.prisma.article.findUnique({ where: { slug } })) {
+      slug = `${baseSlug}-${counter}`
+      counter++
+    }
+
+    return slug
+  }
+}
+```
+
+## Testing Implementation
+
+### Unit Test Examples
+```typescript
+// tests/auth.service.test.ts
+describe('AuthService', () => {
+  let authService: AuthService
+  let mockPrisma: jest.Mocked<PrismaClient>
+  let mockRedis: jest.Mocked<Redis>
+
+  beforeEach(() => {
+    mockPrisma = createMockPrisma()
+    mockRedis = createMockRedis()
+    authService = new AuthService(mockPrisma, mockRedis)
+  })
+
+  describe('login', () => {
+    it('should successfully login with valid credentials', async () => {
+      const mockUser = {
+        id: 1,
+        email: 'test@example.com',
+        password_hash: await bcrypt.hash('password123', 10),
+        name: 'Test User',
+        role: 'admin'
+      }
+
+      mockRedis.incr.mockResolvedValue(1)
+      mockPrisma.user.findUnique.mockResolvedValue(mockUser)
+      bcrypt.compare = jest.fn().mockResolvedValue(true)
+
+      const result = await authService.login('test@example.com', 'password123')
+
+      expect(result).toHaveProperty('accessToken')
+      expect(result.user.email).toBe('test@example.com')
+    })
+
+    it('should enforce rate limiting', async () => {
+      mockRedis.incr.mockResolvedValue(6)
+
+      await expect(authService.login('test@example.com', 'password'))
+        .rejects.toThrow('Too many login attempts')
+    })
+  })
+})
+```
+
+### Integration Test Examples
+```typescript
+// tests/articles.integration.test.ts
+describe('Articles API Integration', () => {
+  let app: Express
+  let authToken: string
+
+  beforeAll(async () => {
+    app = createTestApp()
+    authToken = generateTestToken({ sub: 1, role: 'admin' })
+  })
+
+  describe('POST /articles', () => {
+    it('should create article with valid data', async () => {
+      const articleData = {
+        title: 'Test Article',
+        content: '<p>Test content</p>',
+        status: 'draft'
+      }
+
+      const response = await request(app)
+        .post('/articles')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send(articleData)
+        .expect(201)
+
+      expect(response.body.success).toBe(true)
+      expect(response.body.data.title).toBe(articleData.title)
+      expect(response.body.data.slug).toBe('test-article')
+    })
+
+    it('should require authentication', async () => {
+      await request(app)
+        .post('/articles')
+        .send({ title: 'Test', content: 'Content' })
+        .expect(401)
+    })
+  })
+})
+```
+
+## Final Deployment Strategy
+
+### Docker Configuration
+```dockerfile
+# Multi-stage build for production
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production && npm cache clean --force
+COPY . .
+RUN npm run build
+
+FROM node:20-alpine AS production
+RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
+WORKDIR /app
+COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
+COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=nodejs:nodejs /app/package.json ./
+USER nodejs
+EXPOSE 3000
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:3000/health || exit 1
+CMD ["node", "dist/server.js"]
+```
+
+### Production Monitoring
+```typescript
+// Enhanced health check with detailed metrics
+app.get('/metrics', async (req, res) => {
+  const metrics = {
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    memory: process.memoryUsage(),
+    cpu: process.cpuUsage(),
+    activeConnections: server.connections || 0,
+    environment: process.env.NODE_ENV,
+    version: process.env.APP_VERSION || '1.0.0'
+  }
+  
+  // Get recent API metrics from Redis
+  const recentMetrics = await redis.lrange('api_metrics', 0, 99)
+  metrics.recentRequests = recentMetrics.map(m => JSON.parse(m))
+  
+  res.json(metrics)
+})
+```

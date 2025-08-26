@@ -7,12 +7,12 @@ exports.authenticateToken = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const auth_service_1 = require("../services/auth.service");
 const authenticateToken = async (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
-    if (!token) {
-        return res.status(401).json({ message: 'Access token required.' });
-    }
     try {
+        const authHeader = req.headers['authorization'];
+        const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+        if (!token) {
+            return res.status(401).json({ message: 'Access token required.' });
+        }
         // Check if token is blacklisted
         const isBlacklisted = await (0, auth_service_1.isTokenBlacklisted)(token);
         if (isBlacklisted) {
@@ -20,11 +20,15 @@ const authenticateToken = async (req, res, next) => {
         }
         // Check if JWT secret exists
         if (!process.env.JWT_SECRET) {
+            console.error('JWT_SECRET is not set');
             return res.status(500).json({ message: 'Server configuration error.' });
         }
         // Verify token
         const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
+        // Set user info in request
         req.user = decoded;
+        // Log authentication success
+        console.log(`User authenticated - Role: ${decoded.role}, ID: ${decoded.sub}`);
         next();
     }
     catch (error) {
@@ -34,6 +38,7 @@ const authenticateToken = async (req, res, next) => {
         if (error instanceof jsonwebtoken_1.default.JsonWebTokenError) {
             return res.status(401).json({ message: 'Invalid token.' });
         }
+        console.error('Authentication error:', error);
         next(error);
     }
 };

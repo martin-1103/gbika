@@ -11,4 +11,5 @@ const authRouter = (0, express_1.Router)();
 exports.authRouter = authRouter;
 authRouter.post('/login', rateLimiter_middleware_1.rateLimiter, auth_validator_1.loginValidator, auth_controller_1.login);
 authRouter.post('/logout', auth_middleware_1.authenticateToken, auth_controller_1.logout);
+authRouter.get('/me', auth_middleware_1.authenticateToken, auth_controller_1.getProfile);
 //# sourceMappingURL=auth.routes.js.map

@@ -16,11 +16,17 @@ const redisClient = (0, redis_1.createClient)({
 redisClient.on('error', (err) => {
     console.error('Redis Client Error', err);
 });
-// Connect to Redis
-redisClient.connect();
+// Connect to Redis only if not already connected
+const connectRedis = async () => {
+    if (!redisClient.isOpen) {
+        await redisClient.connect();
+    }
+};
 // Function to close Redis connection (for testing)
 const closeRedisConnection = async () => {
-    await redisClient.quit();
+    if (redisClient.isOpen) {
+        await redisClient.quit();
+    }
 };
 exports.closeRedisConnection = closeRedisConnection;
 const loginUser = async (email, password) => {
@@ -53,6 +59,8 @@ exports.generateToken = generateToken;
 // Add token to blacklist
 const blacklistToken = async (token) => {
     try {
+        // Ensure Redis is connected
+        await connectRedis();
         const decoded = jsonwebtoken_1.default.decode(token);
         if (!decoded || !decoded.jti) {
             throw new Error('Invalid token format');
@@ -73,6 +81,8 @@ exports.blacklistToken = blacklistToken;
 // Check if token is blacklisted
 const isTokenBlacklisted = async (token) => {
     try {
+        // Ensure Redis is connected
+        await connectRedis();
         const decoded = jsonwebtoken_1.default.decode(token);
         if (!decoded || !decoded.jti) {
             return false;

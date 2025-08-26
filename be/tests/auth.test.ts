@@ -32,24 +32,24 @@ describe('Authentication', () => {
       expect(res.statusCode).toEqual(401);
     });
 
-    it('should return 400 when email is missing', async () => {
+    it('should return 422 when email is missing', async () => {
       const res = await request(app)
         .post('/api/auth/login')
         .send({
           password: 'password123',
         });
 
-      expect(res.statusCode).toEqual(400);
+      expect(res.statusCode).toEqual(422);
     });
 
-    it('should return 400 when password is missing', async () => {
+    it('should return 422 when password is missing', async () => {
       const res = await request(app)
         .post('/api/auth/login')
         .send({
           email: 'admin@example.com',
         });
 
-      expect(res.statusCode).toEqual(400);
+      expect(res.statusCode).toEqual(422);
     });
   });
 

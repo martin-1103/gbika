@@ -2,7 +2,13 @@ import { Request, Response, NextFunction } from 'express';
 declare global {
     namespace Express {
         interface Request {
-            user?: any;
+            user?: {
+                sub: string;
+                role: string;
+                jti: string;
+                iat: number;
+                exp: number;
+            };
         }
     }
 }

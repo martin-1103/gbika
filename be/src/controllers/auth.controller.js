@@ -1,8 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.logout = exports.login = void 0;
+exports.getProfile = exports.logout = exports.login = void 0;
 const express_validator_1 = require("express-validator");
 const auth_service_1 = require("../services/auth.service");
+const user_service_1 = require("../services/user.service");
 const login = async (req, res, next) => {
     const errors = (0, express_validator_1.validationResult)(req);
     if (!errors.isEmpty()) {
@@ -49,4 +50,33 @@ const logout = async (req, res, next) => {
     }
 };
 exports.logout = logout;
+// Get current user profile from authenticated token
+const getProfile = async (req, res, next) => {
+    try {
+        // user is guaranteed to exist here due to authenticateToken middleware
+        if (!req.user || !req.user.sub) {
+            return res.status(401).json({ message: 'Authentication required.' });
+        }
+        const userId = req.user.sub;
+        // Retrieve user data without sensitive fields
+        const user = await (0, user_service_1.findUserById)(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+        // Return filtered user profile data
+        res.status(200).json({
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt,
+        });
+    }
+    catch (error) {
+        console.error('Error retrieving user profile:', error);
+        next(error);
+    }
+};
+exports.getProfile = getProfile;
 //# sourceMappingURL=auth.controller.js.map
