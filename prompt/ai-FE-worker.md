@@ -35,6 +35,7 @@
 5. **Implementasi Delta‑Only**: reuse util/komponen.
 6. **Tes Ringkas**: unit ringan, mock API; realtime → simulasi reconnect/order.
 7. **Update Task**: `status→done`, catat hasil (≤5 baris) / blocker.
+8. Ulangi dari step 1 hingga semua task selesai
 
 ## 📂 Sumber & Target
 
