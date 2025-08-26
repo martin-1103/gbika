@@ -1,7 +1,7 @@
 # MASTER — services INDEX
 
 ## Checklist Subtask Modul services
-- [ ] submit-prayer-request-POST-services_prayer.md (priority 15)
+- [x] submit-prayer-request-POST-services_prayer.md (priority 15) ✅ COMPLETED
 - [ ] submit-song-request-POST-services_song_request.md (priority 16)
 
 ## Metadata

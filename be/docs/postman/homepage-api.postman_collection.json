@@ -1,0 +1,312 @@
+{
+  "info": {
+    "_postman_id": "homepage-api-collection",
+    "name": "Homepage API Collection",
+    "description": "Collection for testing Homepage API endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get Homepage Data",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Test response status",
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// Test response time",
+              "pm.test('Response time is less than 500ms', function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(500);",
+              "});",
+              "",
+              "// Test response structure",
+              "pm.test('Response has correct structure', function () {",
+              "    const responseJson = pm.response.json();",
+              "    pm.expect(responseJson).to.have.property('success', true);",
+              "    pm.expect(responseJson).to.have.property('data');",
+              "    pm.expect(responseJson).to.have.property('message');",
+              "});",
+              "",
+              "// Test data structure",
+              "pm.test('Data has latest_articles and today_schedule', function () {",
+              "    const responseJson = pm.response.json();",
+              "    pm.expect(responseJson.data).to.have.property('latest_articles');",
+              "    pm.expect(responseJson.data).to.have.property('today_schedule');",
+              "    pm.expect(responseJson.data.latest_articles).to.be.an('array');",
+              "    pm.expect(responseJson.data.today_schedule).to.be.an('array');",
+              "});",
+              "",
+              "// Test rate limit headers",
+              "pm.test('Rate limit headers are present', function () {",
+              "    pm.expect(pm.response.headers.get('X-RateLimit-Limit')).to.exist;",
+              "    pm.expect(pm.response.headers.get('X-RateLimit-Remaining')).to.exist;",
+              "});",
+              "",
+              "// Test article structure (if articles exist)",
+              "pm.test('Articles have correct structure', function () {",
+              "    const responseJson = pm.response.json();",
+              "    if (responseJson.data.latest_articles.length > 0) {",
+              "        const article = responseJson.data.latest_articles[0];",
+              "        pm.expect(article).to.have.property('id');",
+              "        pm.expect(article).to.have.property('title');",
+              "        pm.expect(article).to.have.property('content');",
+              "        pm.expect(article).to.have.property('published_at');",
+              "        pm.expect(article).to.have.property('status', 'published');",
+              "    }",
+              "});",
+              "",
+              "// Test schedule structure (if schedule exists)",
+              "pm.test('Schedule has correct structure', function () {",
+              "    const responseJson = pm.response.json();",
+              "    if (responseJson.data.today_schedule.length > 0) {",
+              "        const schedule = responseJson.data.today_schedule[0];",
+              "        pm.expect(schedule).to.have.property('time');",
+              "        pm.expect(schedule).to.have.property('endTime');",
+              "        pm.expect(schedule).to.have.property('program_name');",
+              "        pm.expect(schedule).to.have.property('program_id');",
+              "    }",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/pages/homepage",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "pages",
+            "homepage"
+          ]
+        },
+        "description": "Retrieve aggregated homepage data including latest articles and today's schedule"
+      },
+      "response": [
+        {
+          "name": "Success Response",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/pages/homepage",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "pages",
+                "homepage"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "X-RateLimit-Limit",
+              "value": "30"
+            },
+            {
+              "key": "X-RateLimit-Remaining",
+              "value": "29"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"success\": true,\n  \"data\": {\n    \"latest_articles\": [\n      {\n        \"id\": \"article-1\",\n        \"title\": \"Sample Article\",\n        \"content\": \"This is a sample article content...\",\n        \"excerpt\": \"Sample excerpt\",\n        \"published_at\": \"2024-01-01T10:00:00Z\",\n        \"author_id\": \"author-1\",\n        \"category_id\": \"category-1\",\n        \"tags\": [\"news\", \"update\"],\n        \"featured_image\": \"image.jpg\",\n        \"slug\": \"sample-article\",\n        \"status\": \"published\"\n      }\n    ],\n    \"today_schedule\": [\n      {\n        \"time\": \"09:00\",\n        \"endTime\": \"10:00\",\n        \"program_name\": \"Morning Show\",\n        \"program_id\": \"program-1\",\n        \"description\": \"Daily morning program\"\n      }\n    ]\n  },\n  \"message\": \"Homepage data retrieved successfully\"\n}"
+        },
+        {
+          "name": "Rate Limited Response",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/pages/homepage",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "pages",
+                "homepage"
+              ]
+            }
+          },
+          "status": "Too Many Requests",
+          "code": 429,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "X-RateLimit-Limit",
+              "value": "30"
+            },
+            {
+              "key": "X-RateLimit-Remaining",
+              "value": "0"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"success\": false,\n  \"message\": \"Too many requests for homepage data, please try again later.\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Rate Limit Test",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// This test makes multiple requests to test rate limiting",
+              "// Note: This may fail in development due to high rate limits",
+              "",
+              "pm.test('Rate limiting is implemented', function () {",
+              "    // Check if we get rate limit headers",
+              "    pm.expect(pm.response.headers.get('X-RateLimit-Limit')).to.exist;",
+              "    pm.expect(pm.response.headers.get('X-RateLimit-Remaining')).to.exist;",
+              "    ",
+              "    // Status should be either 200 (success) or 429 (rate limited)",
+              "    pm.expect([200, 429]).to.include(pm.response.code);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/pages/homepage",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "pages",
+            "homepage"
+          ]
+        },
+        "description": "Test rate limiting functionality"
+      },
+      "response": []
+    },
+    {
+      "name": "Cache Test - First Request",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Store response time for cache comparison",
+              "pm.globals.set('first_request_time', pm.response.responseTime);",
+              "",
+              "pm.test('First request successful', function () {",
+              "    pm.response.to.have.status(200);",
+              "    const responseJson = pm.response.json();",
+              "    pm.expect(responseJson.success).to.be.true;",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/pages/homepage",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "pages",
+            "homepage"
+          ]
+        },
+        "description": "First request to populate cache"
+      },
+      "response": []
+    },
+    {
+      "name": "Cache Test - Second Request",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Compare response times to verify caching",
+              "const firstRequestTime = pm.globals.get('first_request_time');",
+              "const secondRequestTime = pm.response.responseTime;",
+              "",
+              "pm.test('Second request successful', function () {",
+              "    pm.response.to.have.status(200);",
+              "    const responseJson = pm.response.json();",
+              "    pm.expect(responseJson.success).to.be.true;",
+              "});",
+              "",
+              "pm.test('Cached response is faster or similar', function () {",
+              "    // Cached response should be faster or similar in time",
+              "    // Allow some tolerance for network variations",
+              "    pm.expect(secondRequestTime).to.be.below(firstRequestTime + 100);",
+              "});",
+              "",
+              "// Clean up global variable",
+              "pm.globals.unset('first_request_time');"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/pages/homepage",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "pages",
+            "homepage"
+          ]
+        },
+        "description": "Second request to test cache performance"
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    }
+  ]
+}

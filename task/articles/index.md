@@ -2,10 +2,10 @@
 
 ## Checklist Subtask Modul articles
 - [ ] list-articles-GET-articles.md (priority 20)
-- [ ] get-article-detail-GET-articles_slug.md (priority 21)
+- [x] get-article-detail-GET-articles_slug.md (priority 21)
 - [ ] create-article-POST-articles.md (priority 50)
 - [ ] update-article-PUT-articles_slug.md (priority 51)
-- [ ] delete-article-DELETE-articles_slug.md (priority 52)
+- [x] delete-article-DELETE-articles_slug.md (priority 52)
 
 ## Metadata
 | SUBTASK | METHOD | PATH/FEATURE | FILE | PRIORITY | DEPENDENCIES |

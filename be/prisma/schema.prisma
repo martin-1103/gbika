@@ -33,4 +33,120 @@ model Article {
   updatedAt  DateTime  @updatedAt
   deleted_at DateTime?
   published_at DateTime?
+
+  @@index([status, deleted_at, published_at])
+  @@index([published_at])
+}
+
+model Program {
+  id          String     @id @default(cuid())
+  name        String
+  description String?    @db.Text
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  schedules   Schedule[]
+}
+
+model Schedule {
+  id          String   @id @default(cuid())
+  program     Program  @relation(fields: [programId], references: [id])
+  programId   String
+  dayOfWeek   Int      // 0=Sunday, 1=Monday, ..., 6=Saturday
+  startTime   String   // Format: "HH:MM"
+  endTime     String   // Format: "HH:MM"
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([dayOfWeek, startTime])
+}
+
+model Page {
+  id        String   @id @default(cuid())
+  title     String
+  slug      String   @unique
+  content   String   @db.Text
+  status    String   @default("draft") // draft or published
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model GuestUser {
+  id        String   @id @default(cuid())
+  name      String
+  city      String?
+  country   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  sessions  Session[]
+}
+
+model Session {
+  id          String    @id @default(cuid())
+  guestUser   GuestUser @relation(fields: [guestUserId], references: [id])
+  guestUserId String
+  isActive    Boolean   @default(true)
+  expiresAt   DateTime
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  messages    Message[]
+
+  @@index([guestUserId])
+  @@index([isActive, expiresAt])
+  @@map("sessions")
+}
+
+model Message {
+  id           String   @id @default(cuid())
+  session      Session  @relation(fields: [sessionId], references: [id])
+  sessionId    String
+  text         String
+  sender       String   // "user" or "admin"
+  senderName   String?  // Name of admin/broadcaster who sent the message
+  status       String   @default("pending") // "pending", "approved", "rejected", "blocked"
+  moderatedBy  String?  // ID of user who moderated this message
+  moderatedAt  DateTime? // When the message was moderated
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("messages")
+}
+
+model PrayerRequest {
+  id          String   @id @default(cuid())
+  name        String
+  contact     String
+  content     String   @db.Text
+  isAnonymous Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("prayer_requests")
+}
+
+model SongRequest {
+  id        String   @id @default(cuid())
+  name      String
+  city      String?
+  songTitle String
+  message   String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("song_requests")
+}
+
+model Testimonial {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  city      String?
+  title     String
+  content   String   @db.Text
+  status    String   @default("pending") // pending, approved, rejected
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, createdAt])
+  @@map("testimonials")
 }
