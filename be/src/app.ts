@@ -7,6 +7,8 @@ import { articleRouter } from './routes/article.routes';
 import { serviceRouter } from './routes/service.routes';
 import testimonialRouter from './routes/testimonial.routes';
 import { programRouter } from './routes/program.routes';
+import pageRouter from './routes/page.routes';
+import livechatRouter from './routes/livechat.routes';
 import { errorMiddleware } from './middlewares/error.middleware';
 
 const app: Application = express();
@@ -33,8 +35,8 @@ app.use('/api/articles', articleRouter);
 app.use('/api/services', serviceRouter);
 app.use('/api/testimonials', testimonialRouter);
 app.use('/api/programs', programRouter);
-app.use('/api/pages', require('./routes/page.routes.js'));
-app.use('/api/livechat', require('./routes/livechat.routes.js'));
+app.use('/api/pages', pageRouter);
+app.use('/api/livechat', livechatRouter);
 
 // Error handling
 app.use(errorMiddleware);

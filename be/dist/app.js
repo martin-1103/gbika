@@ -13,6 +13,8 @@ const article_routes_1 = require("./routes/article.routes");
 const service_routes_1 = require("./routes/service.routes");
 const testimonial_routes_1 = __importDefault(require("./routes/testimonial.routes"));
 const program_routes_1 = require("./routes/program.routes");
+const page_routes_1 = __importDefault(require("./routes/page.routes"));
+const livechat_routes_1 = __importDefault(require("./routes/livechat.routes"));
 const error_middleware_1 = require("./middlewares/error.middleware");
 const app = (0, express_1.default)();
 exports.app = app;
@@ -36,8 +38,8 @@ app.use('/api/articles', article_routes_1.articleRouter);
 app.use('/api/services', service_routes_1.serviceRouter);
 app.use('/api/testimonials', testimonial_routes_1.default);
 app.use('/api/programs', program_routes_1.programRouter);
-app.use('/api/pages', require('./routes/page.routes.js'));
-app.use('/api/livechat', require('./routes/livechat.routes.js'));
+app.use('/api/pages', page_routes_1.default);
+app.use('/api/livechat', livechat_routes_1.default);
 // Error handling
 app.use(error_middleware_1.errorMiddleware);
 //# sourceMappingURL=app.js.map

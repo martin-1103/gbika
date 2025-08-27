@@ -2,7 +2,7 @@
 import { app } from './app';
 import dotenv from 'dotenv';
 import { createServer } from 'http';
-const websocketService = require('./services/websocket.service');
+import websocketService from './services/websocket.service';
 
 dotenv.config();
 
