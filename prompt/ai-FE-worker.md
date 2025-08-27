@@ -25,7 +25,7 @@
 
 ## 🚦 Alur Kerja
 
-1. **Ambil Task**: baca `.ai/task-ai/index.ndjson` → pilih `status==todo`, `priority==p0`.
+1. **Ambil Semua Task**: baca `.ai/task-ai/index.ndjson` → pilih `status==todo`.
 2. **Muat Detail**: buka hanya file `.md` terkait.
 3. **Resolve Dep**:
 

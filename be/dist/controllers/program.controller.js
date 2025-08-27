@@ -20,3 +20,4 @@ const getWeeklySchedule = async (req, res) => {
     }
 };
 exports.getWeeklySchedule = getWeeklySchedule;
+//# sourceMappingURL=program.controller.js.map

@@ -217,7 +217,7 @@ export function PartnershipForm({ className }: PartnershipFormProps) {
             <Label htmlFor="partnerType">Jenis Kemitraan *</Label>
             <Select
               value={formData.partnerType}
-              onValueChange={(value) => handleInputChange('partnerType', value)}
+              onValueChange={(value: string) => handleInputChange('partnerType', value)}
               disabled={isSubmitting}
             >
               <SelectTrigger className={errors.partnerType ? "border-red-500" : ""}>
