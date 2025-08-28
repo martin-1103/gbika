@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { PublicLayout } from "@/components/layout"
+import { HeroLayout } from "@/components/layout"
+import { HeroSection } from "@/components/homepage/hero-section"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -192,19 +193,19 @@ export default function ProgramPage() {
   }, [])
 
   return (
-    <PublicLayout>
+    <HeroLayout
+      heroContent={
+        <HeroSection 
+          title="Program & Jadwal"
+          subtitle="Siaran El Shaddai FM"
+          description="Temukan jadwal lengkap program-program siaran El Shaddai FM. Jangan lewatkan program favorit Anda setiap harinya!"
+          showPlayer={false}
+          showThemeToggle={false}
+          backgroundImage="/program-bg.webp"
+        />
+      }
+    >
       <div className="container mx-auto px-4 py-8 space-y-8">
-        {/* Page Header */}
-        <div className="text-center">
-          <div className="flex items-center justify-center space-x-3 mb-4">
-            <Calendar className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold">Program & Jadwal</h1>
-          </div>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Temukan jadwal lengkap program-program siaran El Shaddai FM. 
-            Jangan lewatkan program favorit Anda setiap harinya!
-          </p>
-        </div>
 
         {/* Live Notice */}
         <div className="bg-gradient-to-r from-red-50 to-red-100 border border-red-200 rounded-lg p-4">
@@ -288,6 +289,6 @@ export default function ProgramPage() {
           </div>
         )}
       </div>
-    </PublicLayout>
+    </HeroLayout>
   )
 }

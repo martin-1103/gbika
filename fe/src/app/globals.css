@@ -6,17 +6,17 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
   
-  /* Spacing tokens */
-  --spacing-xs: 0.25rem;
-  --spacing-sm: 0.5rem;
-  --spacing-md: 1rem;
-  --spacing-lg: 1.5rem;
-  --spacing-xl: 2rem;
-  --spacing-2xl: 3rem;
-  --spacing-3xl: 4rem;
+  /* Spacing tokens - Design Guide */
+  --spacing-xs: 0.25rem;  /* 4px */
+  --spacing-sm: 0.5rem;   /* 8px */
+  --spacing-md: 1rem;     /* 16px */
+  --spacing-lg: 1.5rem;   /* 24px */
+  --spacing-xl: 2rem;     /* 32px */
+  --spacing-2xl: 3rem;    /* 48px */
+  --spacing-3xl: 4rem;    /* 64px */
 
   /* Max Width tokens */
   --max-width-xs: 20rem;
@@ -31,39 +31,59 @@
   --max-width-6xl: 72rem;
   --max-width-7xl: 80rem;
   
-  /* Typography tokens */
-  --font-size-xs: 0.75rem;
-  --font-size-sm: 0.875rem;
-  --font-size-base: 1rem;
-  --font-size-lg: 1.125rem;
-  --font-size-xl: 1.25rem;
-  --font-size-2xl: 1.5rem;
-  --font-size-3xl: 1.875rem;
-  --font-size-4xl: 2.25rem;
-  
-  --font-weight-normal: 400;
+  /* Typography tokens - Design Guide */
+  --font-size-small: 0.875rem;   /* 14px */
+  --font-size-base: 1rem;         /* 16px - minimum size */
+  --font-size-large: 1.125rem;    /* 18px */
+  --font-size-h4: 1.25rem;        /* 20px */
+  --font-size-h3: 1.5rem;         /* 24px */
+  --font-size-h2: 2rem;           /* 32px desktop */
+  --font-size-h2-mobile: 1.75rem; /* 28px mobile */
+  --font-size-h1: 3rem;           /* 48px desktop */
+  --font-size-h1-mobile: 2.25rem; /* 36px mobile */
+
+  --font-weight-regular: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
-  
+
   --line-height-tight: 1.25;
-  --line-height-normal: 1.5;
+  --line-height-body: 1.6;        /* Design guide body text */
   --line-height-relaxed: 1.75;
   
-  /* Shadow tokens */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  /* Component sizing - Design Guide */
+  --button-height: 2.75rem;       /* 44px minimum */
+  --button-height-large: 3rem;    /* 48px for seniors */
+  --button-padding-x: 1.5rem;     /* 24px */
+  --button-padding-y: 0.75rem;    /* 12px */
+  --input-padding-x: 1rem;        /* 16px */
+  --input-padding-y: 0.75rem;     /* 12px */
+  --card-padding: 1.5rem;         /* 24px */
+  --card-border-radius: 0.75rem;  /* 12px */
+  --button-border-radius: 0.5rem; /* 8px */
+  --input-border-radius: 0.5rem;  /* 8px */
+
+  /* Shadow tokens - Design Guide Elevation System */
+  --shadow-subtle: 0 1px 2px 0 rgb(0 0 0 / 0.05);                                    /* Level 1 - Cards */
+  --shadow-medium: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); /* Level 2 - Modals */
+  --shadow-large: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); /* Level 3 - Tooltips */
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);   /* Maximum elevation */
   
+  /* Dark mode enhanced shadows */
+  --shadow-dark-subtle: 0 1px 3px 0 rgb(0 0 0 / 0.3);
+  --shadow-dark-medium: 0 4px 12px -1px rgb(0 0 0 / 0.4), 0 2px 8px -2px rgb(0 0 0 / 0.3);
+  --shadow-dark-large: 0 10px 20px -3px rgb(0 0 0 / 0.5), 0 4px 12px -4px rgb(0 0 0 / 0.4);
+
   /* Animation tokens */
   --duration-fast: 150ms;
   --duration-normal: 300ms;
   --duration-slow: 500ms;
-  
+
   --ease-in: cubic-bezier(0.4, 0, 1, 1);
   --ease-out: cubic-bezier(0, 0, 0.2, 1);
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Theme color mappings */
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -101,78 +121,199 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  
+  /* Light Mode - Modern Radio Design */
+  --background: #f8fafc;
+  --background-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  --foreground: #1e293b;
+  --card: #ffffff;
+  --card-foreground: #1e293b;
+  --card-gradient: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(248,250,252,0.8) 100%);
+  --popover: #ffffff;
+  --popover-foreground: #1e293b;
+  
+  /* Brand Colors - Modern Radio Gradients */
+  --primary: #18107b;
+  --primary-gradient: linear-gradient(135deg, #18107b 0%, #2563eb 100%);
+  --primary-foreground: #ffffff;
+  --secondary: #a52077;
+  --secondary-gradient: linear-gradient(135deg, #a52077 0%, #f66884 100%);
+  --secondary-foreground: #ffffff;
+  --accent: #7c3aed;
+  --accent-gradient: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+  --accent-foreground: #ffffff;
+  --warning: #f59e0b;
+  --warning-foreground: #ffffff;
+  
+  /* Surface and Neutral Colors */
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --muted-gradient: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  --secondary-text: #64748b;
+  --muted-text: #94a3b8;
+  
+  /* Borders */
+  --border: rgba(148, 163, 184, 0.2);
+  --border-medium: rgba(148, 163, 184, 0.3);
+  --border-strong: rgba(148, 163, 184, 0.5);
+  --input: rgba(148, 163, 184, 0.2);
+  --ring: #18107b;
+  
+  /* Destructive */
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  
+  /* Hero and Feature Areas */
+  --hero-gradient: linear-gradient(135deg, #18107b 0%, #2e3f4c 50%, #a52077 100%);
+  --feature-gradient: linear-gradient(135deg, rgba(165, 32, 119, 0.1) 0%, rgba(124, 58, 237, 0.1) 100%);
+  
+  /* Chart colors */
+  --chart-1: #18107b;
+  --chart-2: #a52077;
+  --chart-3: #7c3aed;
+  --chart-4: #f59e0b;
+  --chart-5: #10b981;
+  
+  /* Sidebar colors */
+  --sidebar: #ffffff;
+  --sidebar-foreground: #1e293b;
+  --sidebar-primary: #18107b;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f1f5f9;
+  --sidebar-accent-foreground: #1e293b;
+  --sidebar-border: rgba(148, 163, 184, 0.2);
+  --sidebar-ring: #18107b;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* Dark Mode - Modern Radio Design */
+  --background: #0f172a;
+  --background-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  --foreground: #f8fafc;
+  --card: rgba(30, 41, 59, 0.8);
+  --card-foreground: #f8fafc;
+  --card-gradient: linear-gradient(135deg, rgba(30,41,59,0.9) 0%, rgba(15,23,42,0.8) 100%);
+  --popover: #1e293b;
+  --popover-foreground: #f8fafc;
+  
+  /* Brand Colors - Dark Mode Gradients */
+  --primary: #2563eb;
+  --primary-gradient: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+  --primary-foreground: #ffffff;
+  --secondary: #f66884;
+  --secondary-gradient: linear-gradient(135deg, #f66884 0%, #fb7185 100%);
+  --secondary-foreground: #ffffff;
+  --accent: #a855f7;
+  --accent-gradient: linear-gradient(135deg, #a855f7 0%, #c084fc 100%);
+  --accent-foreground: #ffffff;
+  --warning: #f59e0b;
+  --warning-foreground: #ffffff;
+  
+  /* Surface and Neutral Colors */
+  --muted: rgba(51, 65, 85, 0.8);
+  --muted-foreground: #cbd5e1;
+  --muted-gradient: linear-gradient(135deg, rgba(51,65,85,0.8) 0%, rgba(30,41,59,0.6) 100%);
+  --secondary-text: #cbd5e1;
+  --muted-text: #94a3b8;
+  
+  /* Borders */
+  --border: rgba(203, 213, 225, 0.1);
+  --border-medium: rgba(203, 213, 225, 0.2);
+  --border-strong: rgba(203, 213, 225, 0.3);
+  --input: rgba(203, 213, 225, 0.1);
+  --ring: #2563eb;
+  
+  /* Destructive */
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  
+  /* Hero and Feature Areas - Dark */
+  --hero-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 30%, #374151 70%, #4c1d95 100%);
+  --feature-gradient: linear-gradient(135deg, rgba(246, 104, 132, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
+  
+  /* Chart colors */
+  --chart-1: #2563eb;
+  --chart-2: #f66884;
+  --chart-3: #a855f7;
+  --chart-4: #f59e0b;
+  --chart-5: #10b981;
+  
+  /* Sidebar colors */
+  --sidebar: rgba(30, 41, 59, 0.9);
+  --sidebar-foreground: #f8fafc;
+  --sidebar-primary: #2563eb;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: rgba(51, 65, 85, 0.8);
+  --sidebar-accent-foreground: #f8fafc;
+  --sidebar-border: rgba(203, 213, 225, 0.1);
+  --sidebar-ring: #2563eb;
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+  
+  html {
+    /* Minimum 16px base font size for accessibility */
+    font-size: 16px;
+  }
+  
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background: var(--background-gradient);
+    /* Design guide body text line height */
+    line-height: var(--line-height-body);
+    /* Ensure smooth theme transitions */
+    transition: all 300ms ease;
+    min-height: 100vh;
+  }
+  
+  /* Typography scale - Design Guide */
+  h1 {
+    font-size: var(--font-size-h1-mobile);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-tight);
+  }
+  
+  @media (min-width: 768px) {
+    h1 {
+      font-size: var(--font-size-h1);
+    }
+  }
+  
+  h2 {
+    font-size: var(--font-size-h2-mobile);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-tight);
+  }
+  
+  @media (min-width: 768px) {
+    h2 {
+      font-size: var(--font-size-h2);
+    }
+  }
+  
+  h3 {
+    font-size: var(--font-size-h3);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-tight);
+  }
+  
+  h4 {
+    font-size: var(--font-size-h4);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-tight);
+  }
+  
+  /* Touch targets minimum 44px for accessibility */
+  button, a, input, select, textarea {
+    min-height: var(--button-height);
+  }
+  
+  /* Focus indicators for accessibility */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
   }
 }

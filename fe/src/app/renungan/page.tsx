@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
-import { PublicLayout } from "@/components/layout"
+import { HeroLayout } from "@/components/layout"
+import { HeroSection } from "@/components/homepage/hero-section"
 import { ArticleCard } from "@/components/cards"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -165,19 +166,19 @@ function RenunganContent() {
   )
 
   return (
-    <PublicLayout>
+    <HeroLayout
+      heroContent={
+        <HeroSection 
+          title="Renungan Harian"
+          subtitle="Firman yang Membangun"
+          description="Perkuat iman Anda dengan renungan-renungan yang membangun dan menginspirasi. Temukan makna mendalam dalam setiap artikel rohani kami."
+          showPlayer={false}
+          showThemeToggle={false}
+          backgroundImage="/devotion-bg.webp"
+        />
+      }
+    >
       <div className="container mx-auto px-4 py-8 space-y-8">
-        {/* Page Header */}
-        <div className="text-center">
-          <div className="flex items-center justify-center space-x-3 mb-4">
-            <BookOpen className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold">Renungan Harian</h1>
-          </div>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Perkuat iman Anda dengan renungan-renungan yang membangun dan menginspirasi. 
-            Temukan makna mendalam dalam setiap artikel rohani kami.
-          </p>
-        </div>
 
         {/* Search Bar */}
         <div className="max-w-md mx-auto">
@@ -325,7 +326,7 @@ function RenunganContent() {
           </div>
         )}
       </div>
-    </PublicLayout>
+    </HeroLayout>
   )
 }
 

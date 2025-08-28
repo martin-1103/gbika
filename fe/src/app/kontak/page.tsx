@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { PublicLayout } from "@/components/layout"
+import { HeroLayout } from "@/components/layout"
+import { HeroSection } from "@/components/homepage/hero-section"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -104,23 +105,19 @@ export default function KontakPage() {
   }
 
   return (
-    <PublicLayout>
+    <HeroLayout
+      heroContent={
+        <HeroSection 
+          title="Mari Terhubung"
+          subtitle="Hubungi Kami"
+          description="Kami senang mendengar dari Anda. Hubungi kami untuk pertanyaan, saran, atau kerjasama yang dapat membangun pelayanan Radio Gbika."
+          showPlayer={false}
+          showThemeToggle={false}
+          backgroundImage="/contact-bg.webp"
+        />
+      }
+    >
       <div className="container mx-auto px-4 py-8 space-y-8">
-        {/* Hero Section */}
-        <div className="text-center space-y-4">
-          <Badge variant="outline" className="text-primary">
-            <MessageCircle className="w-4 h-4 mr-2" />
-            Hubungi Kami
-          </Badge>
-          <h1 className="text-4xl md:text-5xl font-bold">
-            Mari
-            <span className="block text-primary">Terhubung</span>
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Kami senang mendengar dari Anda. Hubungi kami untuk pertanyaan, saran, 
-            atau kerjasama yang dapat membangun pelayanan Radio Gbika.
-          </p>
-        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Contact Information */}
@@ -483,6 +480,6 @@ export default function KontakPage() {
           </CardContent>
         </Card>
       </div>
-    </PublicLayout>
+    </HeroLayout>
   )
 }

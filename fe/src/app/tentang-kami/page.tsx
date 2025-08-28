@@ -1,6 +1,7 @@
 "use client"
 
-import { PublicLayout } from "@/components/layout"
+import { HeroLayout } from "@/components/layout"
+import { HeroSection } from "@/components/homepage/hero-section"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -18,25 +19,21 @@ import {
 import Link from "next/link"
 
 // About Us page: Radio Gbika company information and history
-export default function TentangKamiPage() {
+export default function AboutPage() {
   return (
-    <PublicLayout>
-      <div className="container mx-auto px-4 py-8 space-y-12">
-        {/* Hero Section */}
-        <div className="text-center space-y-6">
-          <Badge variant="outline" className="text-primary">
-            <Radio className="w-4 h-4 mr-2" />
-            Tentang Radio Gbika
-          </Badge>
-          <h1 className="text-4xl md:text-5xl font-bold">
-            Menyebarkan Kasih Kristus
-            <span className="block text-primary">Melalui Gelombang Radio</span>
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Radio Gbika telah melayani masyarakat selama puluhan tahun dengan program-program 
-            yang menghibur, menginspirasi, dan menguatkan iman.
-          </p>
-        </div>
+    <HeroLayout
+        heroContent={
+          <HeroSection 
+            title="Tentang Kami"
+            subtitle="Radio Gbika"
+            description="Menyebarkan kasih Kristus melalui gelombang radio dengan program-program yang membangun iman dan karakter."
+            showPlayer={false}
+            showThemeToggle={false}
+            backgroundImage="/about-bg.webp"
+          />
+        }
+      >
+        <div className="container mx-auto px-4 py-8 space-y-12">
 
         {/* Mission & Vision */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -248,6 +245,6 @@ export default function TentangKamiPage() {
           </div>
         </div>
       </div>
-    </PublicLayout>
+    </HeroLayout>
   )
 }

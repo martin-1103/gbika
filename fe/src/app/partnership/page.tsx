@@ -1,6 +1,7 @@
 "use client"
 
-import { PublicLayout } from "@/components/layout"
+import { HeroLayout } from "@/components/layout"
+import { HeroSection } from "@/components/homepage/hero-section"
 import { PartnershipForm } from "@/components/forms"
 import { Card, CardContent } from "@/components/ui/card"
 import { 
@@ -17,19 +18,19 @@ import {
 // Partnership page: Information and form for partnership opportunities
 export default function PartnershipPage() {
   return (
-    <PublicLayout>
+    <HeroLayout
+      heroContent={
+        <HeroSection 
+          title="Partnership"
+          subtitle="Bersama Menyebarkan Injil"
+          description="Bergabunglah dengan Radio Gbika dalam misi menyebarkan Injil melalui media radio. Bersama-sama kita dapat menjangkau lebih banyak jiwa untuk kerajaan Tuhan."
+          showPlayer={false}
+          showThemeToggle={false}
+          backgroundImage="/partnership-bg.webp"
+        />
+      }
+    >
       <div className="container mx-auto px-4 py-8 space-y-8">
-        {/* Page Header */}
-        <div className="text-center">
-          <div className="flex items-center justify-center space-x-3 mb-4">
-            <Handshake className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold">Partnership</h1>
-          </div>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Bergabunglah dengan Radio Gbika dalam misi menyebarkan Injil melalui media radio. 
-            Bersama-sama kita dapat menjangkau lebih banyak jiwa untuk kerajaan Tuhan.
-          </p>
-        </div>
 
         {/* Partnership Benefits */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
@@ -336,6 +337,6 @@ export default function PartnershipPage() {
           </div>
         </div>
       </div>
-    </PublicLayout>
+    </HeroLayout>
   )
 }

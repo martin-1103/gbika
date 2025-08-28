@@ -1,6 +1,7 @@
 "use client"
 
-import { PublicLayout } from "@/components/layout"
+import { HeroLayout } from "@/components/layout"
+import { HeroSection } from "@/components/homepage/hero-section"
 import { TestimonialSubmitForm } from "@/components/forms"
 import { Card, CardContent } from "@/components/ui/card"
 import { 
@@ -15,19 +16,19 @@ import {
 // Submit Testimonial page: Form for submitting testimonials
 export default function SubmitTestimonialPage() {
   return (
-    <PublicLayout>
+    <HeroLayout
+      heroContent={
+        <HeroSection 
+          title="Kirim Kesaksian"
+          subtitle="Bagikan Berkat Tuhan"
+          description="Bagikan pengalaman luar biasa Anda dengan Tuhan. Kesaksian Anda dapat menjadi berkat dan kekuatan bagi saudara seiman lainnya."
+          showPlayer={false}
+          showThemeToggle={false}
+          backgroundImage="/testimony-submit-bg.webp"
+        />
+      }
+    >
       <div className="container mx-auto px-4 py-8 space-y-8">
-        {/* Page Header */}
-        <div className="text-center">
-          <div className="flex items-center justify-center space-x-3 mb-4">
-            <MessageSquare className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold">Kirim Kesaksian</h1>
-          </div>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Bagikan pengalaman luar biasa Anda dengan Tuhan. Kesaksian Anda dapat 
-            menjadi berkat dan kekuatan bagi saudara seiman lainnya.
-          </p>
-        </div>
 
         {/* Benefits Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
@@ -280,6 +281,6 @@ export default function SubmitTestimonialPage() {
           </Card>
         </div>
       </div>
-    </PublicLayout>
+    </HeroLayout>
   )
 }

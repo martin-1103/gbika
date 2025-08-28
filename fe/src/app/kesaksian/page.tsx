@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
-import { PublicLayout } from "@/components/layout"
+import { HeroLayout } from "@/components/layout"
+import { HeroSection } from "@/components/homepage/hero-section"
 import { TestimonialCard } from "@/components/cards"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -125,20 +126,19 @@ function TestimonialsContent() {
   )
 
   return (
-    <PublicLayout>
+    <HeroLayout
+      heroContent={
+        <HeroSection 
+          title="Kesaksian"
+          subtitle="Kuasa Tuhan Nyata"
+          description="Baca kisah-kisah luar biasa tentang bagaimana Tuhan bekerja dalam kehidupan umat-Nya. Mari saling menguatkan dalam iman."
+          showPlayer={false}
+          showThemeToggle={false}
+          backgroundImage="/testimony-bg.webp"
+        />
+      }
+    >
       <div className="container mx-auto px-4 py-8 space-y-8">
-        {/* Page Header */}
-        <div className="text-center">
-          <div className="flex items-center justify-center space-x-3 mb-4">
-            <MessageSquare className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold">Kesaksian</h1>
-          </div>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Baca kisah-kisah luar biasa tentang bagaimana Tuhan bekerja dalam 
-            kehidupan para pendengar Radio Gbika. Mari bersama bersyukur 
-            atas kasih dan mujizat-Nya.
-          </p>
-        </div>
 
         {/* Call to Action */}
         <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg p-6 text-center">
@@ -296,7 +296,7 @@ function TestimonialsContent() {
           </div>
         )}
       </div>
-    </PublicLayout>
+    </HeroLayout>
   )
 }
 

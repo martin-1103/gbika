@@ -1,6 +1,7 @@
 "use client"
 
-import { PublicLayout } from "@/components/layout"
+import { HeroLayout } from "@/components/layout"
+import { HeroSection } from "@/components/homepage/hero-section"
 import { AdvertisingForm } from "@/components/forms"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -98,23 +99,19 @@ export default function PasangIklanPage() {
   ]
 
   return (
-    <PublicLayout>
+    <HeroLayout
+      heroContent={
+        <HeroSection 
+          title="Jangkau Ribuan Pendengar Setia"
+          subtitle="Pasang Iklan"
+          description="Promosikan bisnis Anda melalui Radio Gbika dan capai audiens yang tepat dengan program-program berkualitas dan nilai-nilai Kristiani."
+          showPlayer={false}
+          showThemeToggle={false}
+          backgroundImage="/advertising-bg.webp"
+        />
+      }
+    >
       <div className="container mx-auto px-4 py-8 space-y-12">
-        {/* Hero Section */}
-        <div className="text-center space-y-6">
-          <Badge variant="outline" className="text-primary">
-            <Megaphone className="w-4 h-4 mr-2" />
-            Pasang Iklan
-          </Badge>
-          <h1 className="text-4xl md:text-5xl font-bold">
-            Jangkau Ribuan
-            <span className="block text-primary">Pendengar Setia</span>
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Promosikan bisnis Anda melalui Radio Gbika dan capai audiens yang tepat 
-            dengan program-program berkualitas dan nilai-nilai Kristiani.
-          </p>
-        </div>
 
         {/* Stats Section */}
         <div className="bg-primary/5 rounded-2xl p-8">
@@ -380,6 +377,6 @@ export default function PasangIklanPage() {
           </div>
         </div>
       </div>
-    </PublicLayout>
+    </HeroLayout>
   )
 }
