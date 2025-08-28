@@ -154,7 +154,7 @@ export default function PenyiarPage() {
             <span className="block text-primary">Yang Memberkati</span>
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Berkenalan dengan tim penyiar Radio Gbika yang berdedikasi menyebarkan kasih Kristus 
+            Berkenalan dengan tim penyiar Radio El-Shaddai FM yang berdedikasi menyebarkan kasih Kristus 
             melalui program-program yang inspiratif dan menghibur.
           </p>
         </div>
@@ -279,7 +279,7 @@ export default function PenyiarPage() {
           <h2 className="text-2xl font-bold">Tertarik Bergabung?</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             Jika Anda memiliki passion untuk pelayanan melalui media radio dan ingin menjadi 
-            bagian dari tim Radio Gbika, kami sangat terbuka untuk kandidat yang tepat.
+            bagian dari tim Radio El-Shaddai FM, kami sangat terbuka untuk kandidat yang tepat.
           </p>
           <Button size="lg">
             <Mic className="mr-2 h-4 w-4" />

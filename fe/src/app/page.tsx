@@ -8,7 +8,7 @@ import {
   CallToAction
 } from "@/components/homepage";
 
-// Homepage: Main gateway for visitors with live status, schedule, articles, testimonials, and chat
+// Homepage: Modern clean dashboard-style layout with card-based components
 export default function Home() {
   return (
     <HeroLayout
@@ -23,33 +23,51 @@ export default function Home() {
       }
     >
 
-      {/* Main Content Grid */}
-      <section className="py-16 px-4 relative">
-        {/* Feature gradient background */}
-        <div 
-          className="absolute inset-0 opacity-30"
-          style={{ background: 'var(--feature-gradient)' }}
-        />
-        
-        <div className="container mx-auto relative">
-          <div className="grid lg:grid-cols-3 gap-8">
-            {/* Left Column - Schedule & Articles */}
-            <div className="lg:col-span-2 space-y-8">
-              <TodaySchedule />
-              <LatestArticles />
-            </div>
-            
-            {/* Right Column - Testimonials & Chat */}
-            <div className="space-y-8">
-              <LatestTestimonials />
-              <LiveChatWidget />
-            </div>
-          </div>
-        </div>
-      </section>
+       {/* Full Width - Testimonials */}
+        <LatestTestimonials />
 
-      {/* Call to Action */}
-      <CallToAction />
+
+      {/* Modern Dashboard Layout */}
+      <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background">
+        
+        {/* Main Dashboard Grid */}
+        <section className="py-12 px-4 lg:px-8">
+          <div className="max-w-7xl mx-auto">
+            
+           
+
+            {/* Primary Grid - Dashboard Style */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+              
+              {/* Left Column - Schedule & Stats */}
+              <div className="lg:col-span-8 space-y-6">
+                
+                {/* Today's Schedule - Main Widget */}
+                <div className="bg-card rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300">
+                  <TodaySchedule />
+                </div>
+                
+              </div>
+
+              {/* Right Sidebar - Live Chat */}
+              <div className="lg:col-span-4">
+                <div className="bg-card rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 sticky top-6">
+                  <LiveChatWidget />
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+        
+       
+        
+        {/* Full Width - Latest Articles */}
+        <LatestArticles />
+
+        {/* Call to Action */}
+        <CallToAction />
+      </div>
     </HeroLayout>
   );
 }

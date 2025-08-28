@@ -1,7 +1,7 @@
 // [article.routes.ts]: Article routes
 import { Router } from 'express';
 import { listArticles, findBySlug, deleteArticle, createArticleController, updateArticle } from '../controllers/article.controller';
-import { authenticateToken } from '../middlewares/auth.middleware';
+import { authenticateToken, optionalAuthenticateToken } from '../middlewares/auth.middleware';
 import { authorizeRoles } from '../middlewares/roles.middleware';
 import { validateListArticles, validateCreateArticle, validateUpdateArticle } from '../middlewares/article.validation';
 
@@ -14,8 +14,8 @@ console.log('listArticles:', typeof listArticles, listArticles);
 // GET /articles - List published articles (public)
 articleRouter.get('/', validateListArticles, listArticles);
 
-// GET /articles/:slug - Get article detail by slug (public)
-articleRouter.get('/:slug', findBySlug);
+// GET /articles/:slug - Get article detail by slug (public/admin)
+articleRouter.get('/:slug', optionalAuthenticateToken, findBySlug);
 
 console.log('=== Article routes registered ===');
 

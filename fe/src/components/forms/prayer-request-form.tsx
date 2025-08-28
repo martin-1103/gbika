@@ -142,7 +142,7 @@ export function PrayerRequestForm({ className }: PrayerRequestFormProps) {
           Permohonan Doa
         </CardTitle>
         <CardDescription>
-          Kirimkan permohonan doa Anda kepada tim doa Radio Gbika. 
+          Kirimkan permohonan doa Anda kepada tim doa Radio El-Shaddai FM. 
           Kami akan mendoakan Anda dengan sepenuh hati.
         </CardDescription>
       </CardHeader>
@@ -277,7 +277,7 @@ export function PrayerRequestForm({ className }: PrayerRequestFormProps) {
         <div className="mt-6 p-4 bg-muted/50 rounded-lg">
           <p className="text-sm text-muted-foreground text-center">
             <strong>Catatan:</strong> Semua permohonan doa akan ditangani dengan penuh kasih 
-            dan kerahasiaan oleh tim doa Radio Gbika. Kami percaya Tuhan akan menjawab 
+            dan kerahasiaan oleh tim doa Radio El-Shaddai FM. Kami percaya Tuhan akan menjawab 
             setiap doa yang dinaikkan dengan iman.
           </p>
         </div>

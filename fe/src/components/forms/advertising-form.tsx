@@ -131,7 +131,7 @@ export function AdvertisingForm({ className }: AdvertisingFormProps) {
           Ajukan Pemasangan Iklan
         </CardTitle>
         <CardDescription>
-          Promosikan bisnis atau acara Anda melalui Radio Gbika dan jangkau 
+          Promosikan bisnis atau acara Anda melalui Radio El-Shaddai FM dan jangkau 
           ribuan pendengar setiap harinya dengan nilai-nilai Kristiani.
         </CardDescription>
       </CardHeader>
@@ -393,7 +393,7 @@ export function AdvertisingForm({ className }: AdvertisingFormProps) {
         <div className="mt-6 p-4 bg-muted/50 rounded-lg">
           <p className="text-sm text-muted-foreground">
             <strong>Catatan Penting:</strong> Semua iklan akan ditinjau terlebih dahulu 
-            untuk memastikan sesuai dengan nilai-nilai dan standar Radio Gbika. Kami 
+            untuk memastikan sesuai dengan nilai-nilai dan standar Radio El-Shaddai FM. Kami 
             berhak menolak iklan yang tidak sesuai dengan visi misi kami. Tim marketing 
             akan menghubungi Anda untuk pembahasan detail paket, harga, dan jadwal tayang.
           </p>

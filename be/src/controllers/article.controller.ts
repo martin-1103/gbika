@@ -16,7 +16,8 @@ export const listArticles = async (req: Request, res: Response, next: NextFuncti
       page = 1,
       limit = 10,
       sort_by = 'published_at',
-      sort_order = 'desc'
+      sort_order = 'desc',
+      admin = 'false'
     } = req.query;
 
     // Convert query params to proper types
@@ -24,7 +25,8 @@ export const listArticles = async (req: Request, res: Response, next: NextFuncti
       page: parseInt(page as string, 10),
       limit: parseInt(limit as string, 10),
       sortBy: sort_by as 'published_at' | 'createdAt',
-      sortOrder: sort_order as 'asc' | 'desc'
+      sortOrder: sort_order as 'asc' | 'desc',
+      admin: admin === 'true'
     };
 
     const result = await findAll(params);
@@ -60,7 +62,7 @@ export const updateArticle = async (req: Request, res: Response, next: NextFunct
     });
 
     const { slug } = req.params;
-    const { title, content, slug: newSlug, status } = req.body;
+    const { title, content, slug: newSlug, status, published_at } = req.body;
 
     // Ensure slug is provided
     if (!slug) {
@@ -75,7 +77,8 @@ export const updateArticle = async (req: Request, res: Response, next: NextFunct
       title,
       content,
       slug: newSlug,
-      status
+      status,
+      published_at
     });
 
     // Log operation result
@@ -125,7 +128,8 @@ export const findBySlug = async (req: Request, res: Response, next: NextFunction
     console.log('=== ENTERING findBySlug controller ===');
     // Log request details
     console.log('Get article detail request:', {
-      slug: req.params.slug
+      slug: req.params.slug,
+      user: req.user
     });
 
     const { slug } = req.params;
@@ -138,7 +142,10 @@ export const findBySlug = async (req: Request, res: Response, next: NextFunction
       });
     }
 
-    const article = await findOneBySlug(slug);
+    // Check if user is admin (has valid JWT token)
+    const isAdmin = !!req.user;
+
+    const article = await findOneBySlug(slug, isAdmin);
 
     // Log operation result
     console.log('Get article detail result:', {

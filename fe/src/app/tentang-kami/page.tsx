@@ -18,17 +18,17 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 
-// About Us page: Radio Gbika company information and history
+// About Us page: Radio El-Shaddai FM company information and history
 export default function AboutPage() {
   return (
     <HeroLayout
         heroContent={
           <HeroSection 
             title="Tentang Kami"
-            subtitle="Radio Gbika"
+            subtitle="Radio El-Shaddai FM"
             description="Menyebarkan kasih Kristus melalui gelombang radio dengan program-program yang membangun iman dan karakter."
             showPlayer={false}
-            showThemeToggle={false}
+            
             backgroundImage="/about-bg.webp"
           />
         }
@@ -81,7 +81,7 @@ export default function AboutPage() {
               <div className="flex-1">
                 <h3 className="font-semibold">Berdiri Pertama Kali</h3>
                 <p className="text-muted-foreground">
-                  Radio Gbika didirikan dengan visi menyebarkan kasih Kristus melalui gelombang radio.
+                  Radio El-Shaddai FM didirikan dengan visi menyebarkan kasih Kristus melalui gelombang radio.
                 </p>
               </div>
             </div>
@@ -126,7 +126,7 @@ export default function AboutPage() {
 
         {/* Stats */}
         <div className="bg-primary/5 rounded-2xl p-8">
-          <h2 className="text-3xl font-bold text-center mb-8">Radio Gbika Dalam Angka</h2>
+          <h2 className="text-3xl font-bold text-center mb-8">Radio El-Shaddai FM Dalam Angka</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="text-center">
               <div className="text-3xl font-bold text-primary">35+</div>
@@ -158,7 +158,7 @@ export default function AboutPage() {
                 </div>
                 <h3 className="font-semibold">Pdt. John Doe</h3>
                 <p className="text-sm text-muted-foreground mb-2">Direktur Utama</p>
-                <p className="text-xs">Memimpin visi dan strategi Radio Gbika</p>
+                <p className="text-xs">Memimpin visi dan strategi Radio El-Shaddai FM</p>
               </CardContent>
             </Card>
 
@@ -197,7 +197,7 @@ export default function AboutPage() {
                 <MapPin className="h-6 w-6 mx-auto text-primary" />
                 <h3 className="font-semibold">Alamat</h3>
                 <p className="text-sm text-muted-foreground">
-                  Jl. Radio Gbika No. 123<br />
+                  Jl. Radio El-Shaddai FM No. 123<br />
                   Jakarta Selatan, 12345
                 </p>
               </div>

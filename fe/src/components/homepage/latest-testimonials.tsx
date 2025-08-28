@@ -4,7 +4,8 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { TestimonialCard } from "@/components/cards"
-import { Heart } from "lucide-react"
+import { Heart, ChevronLeft, ChevronRight } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import Link from "next/link"
 
 interface Testimonial {
@@ -22,11 +23,13 @@ interface LatestTestimonialsProps {
   className?: string
 }
 
-// LatestTestimonials: Display recent approved testimonials
+// LatestTestimonials: Display recent approved testimonials in carousel format
 export function LatestTestimonials({ className }: LatestTestimonialsProps) {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [isAnimating, setIsAnimating] = useState(false)
 
   // Fetch latest testimonials
   useEffect(() => {
@@ -42,7 +45,7 @@ export function LatestTestimonials({ className }: LatestTestimonialsProps) {
           {
             id: "1",
             title: "Tuhan Menyembuhkan Keluarga Kami",
-            content: "Melalui Radio Gbika, kami belajar untuk saling mengampuni dan membangun kembali hubungan yang rusak. Sekarang keluarga kami hidup dalam damai dan kasih Kristus.",
+            content: "Melalui Radio El-Shaddai FM, kami belajar untuk saling mengampuni dan membangun kembali hubungan yang rusak. Sekarang keluarga kami hidup dalam damai dan kasih Kristus.",
             author_name: "Sarah M.",
             author_location: "Jakarta",
             submitted_at: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(), // 3 hours ago
@@ -52,7 +55,7 @@ export function LatestTestimonials({ className }: LatestTestimonialsProps) {
           {
             id: "2",
             title: "Mukjizat Penyembuhan",
-            content: "Setelah mendengarkan doa syafaat di Radio Gbika, kondisi kesehatan saya berangsur membaik. Dokter pun heran dengan kemajuan yang pesat. Puji Tuhan!",
+            content: "Setelah mendengarkan doa syafaat di Radio El-Shaddai FM, kondisi kesehatan saya berangsur membaik. Dokter pun heran dengan kemajuan yang pesat. Puji Tuhan!",
             author_name: "Budi S.",
             author_location: "Bandung",
             submitted_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
@@ -62,7 +65,7 @@ export function LatestTestimonials({ className }: LatestTestimonialsProps) {
           {
             id: "3",
             title: "Pekerjaan Baru di Masa Sulit",
-            content: "Di tengah pandemi, saya kehilangan pekerjaan. Namun setelah bergabung dalam doa bersama Radio Gbika, Tuhan membuka pintu pekerjaan yang lebih baik.",
+            content: "Di tengah pandemi, saya kehilangan pekerjaan. Namun setelah bergabung dalam doa bersama Radio El-Shaddai FM, Tuhan membuka pintu pekerjaan yang lebih baik.",
             author_name: "Maria L.",
             author_location: "Surabaya",
             submitted_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
@@ -83,116 +86,123 @@ export function LatestTestimonials({ className }: LatestTestimonialsProps) {
     fetchTestimonials()
   }, [])
 
+  // Navigate to next testimonial
+  const nextTestimonial = () => {
+    if (isAnimating || testimonials.length === 0) return
+    setIsAnimating(true)
+    setCurrentIndex((prev) => (prev + 1) % testimonials.length)
+    setTimeout(() => setIsAnimating(false), 5000)
+  }
+
+  // Navigate to previous testimonial
+  const prevTestimonial = () => {
+    if (isAnimating || testimonials.length === 0) return
+    setIsAnimating(true)
+    setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length)
+    setTimeout(() => setIsAnimating(false), 5000)
+  }
+
+  // Auto-play carousel
+  useEffect(() => {
+    if (testimonials.length === 0) return
+    
+    const interval = setInterval(() => {
+      nextTestimonial()
+    }, 5000) // Change every 5 seconds
+
+    return () => clearInterval(interval)
+  }, [testimonials.length, isAnimating])
+
   if (loading) {
     return (
-      <div className={className}>
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">
-            <Heart className="w-6 h-6" />
-            Kesaksian Terbaru
-          </h2>
-          <p className="text-muted-foreground">
-            Bagaimana Tuhan bekerja dalam hidup pendengar kami
-          </p>
+      <section className="w-full bg-gradient-to-br from-slate-50 to-blue-50 py-16">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="text-center">
+            <Skeleton className="h-8 w-3/4 mx-auto mb-6" />
+            <Skeleton className="h-32 w-full mb-8" />
+            <div className="flex items-center justify-center gap-2">
+              <Skeleton className="h-6 w-32" />
+            </div>
+          </div>
         </div>
-        
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(3)].map((_, i) => (
-            <Card key={i}>
-              <CardHeader>
-                <Skeleton className="h-4 w-3/4" />
-                <Skeleton className="h-3 w-1/2" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-24 w-full mb-4" />
-                <div className="flex items-center gap-2">
-                  <Skeleton className="h-4 w-4 rounded-full" />
-                  <Skeleton className="h-3 w-20" />
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
+      </section>
     )
   }
 
   if (error) {
     return (
-      <div className={className}>
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">
-            <Heart className="w-6 h-6" />
-            Kesaksian Terbaru
-          </h2>
+      <section className="w-full bg-gradient-to-br from-slate-50 to-blue-50 py-16">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="text-center">
+            <p className="text-gray-600 text-lg">{error}</p>
+          </div>
         </div>
-        <Card>
-          <CardContent className="py-8">
-            <p className="text-muted-foreground text-center">{error}</p>
-          </CardContent>
-        </Card>
-      </div>
+      </section>
     )
   }
 
   if (testimonials.length === 0) {
     return (
-      <div className={className}>
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">
-            <Heart className="w-6 h-6" />
-            Kesaksian Terbaru
-          </h2>
-        </div>
-        <Card>
-          <CardContent className="py-8">
-            <p className="text-muted-foreground text-center">
+      <section className="w-full bg-gradient-to-br from-slate-50 to-blue-50 py-16">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="text-center">
+            <p className="text-gray-600 text-lg">
               Belum ada kesaksian tersedia
             </p>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </div>
+      </section>
     )
   }
 
+  const currentTestimonial = testimonials[currentIndex]
+
   return (
-    <div className={className}>
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">
-          <Heart className="w-6 h-6" />
-          Kesaksian Terbaru
-        </h2>
-        <p className="text-muted-foreground">
-          Bagaimana Tuhan bekerja dalam hidup pendengar kami
-        </p>
+    <section className="w-full bg-gradient-to-br from-slate-50 to-blue-50 py-16">
+      <div className="max-w-4xl mx-auto px-4">
+        {/* Testimonial Content - Simple Text Only */}
+        <div className="text-center mb-12">
+          <div 
+            className={`transition-all duration-[5000ms] ease-in-out ${
+              isAnimating ? 'opacity-0 transform scale-95' : 'opacity-100 transform scale-100'
+            }`}
+          >
+            <div className="mb-8">
+              <h3 className="text-2xl font-bold mb-6 text-gray-900">
+                {currentTestimonial?.title}
+              </h3>
+              <blockquote className="text-xl text-gray-700 leading-relaxed italic mb-8">
+                "{currentTestimonial?.content}"
+              </blockquote>
+            </div>
+            
+            <div className="flex items-center justify-center gap-3 mb-8">
+              <div className="text-center">
+                <p className="font-semibold text-gray-900 text-lg">
+                  {currentTestimonial?.author_name}
+                </p>
+                {currentTestimonial?.author_location && (
+                  <p className="text-gray-600">
+                    {currentTestimonial.author_location}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        
+        {/* Link to All Testimonials */}
+        <div className="text-center">
+          <Link 
+            href="/kesaksian" 
+            className="text-blue-600 hover:text-blue-800 text-sm hover:underline transition-colors"
+          >
+            Lihat Semua Kesaksian
+          </Link>
+        </div>
       </div>
-      
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {testimonials.map((testimonial) => (
-          <TestimonialCard
-            key={testimonial.id}
-            testimonial={{
-              id: testimonial.id,
-              title: testimonial.title,
-              name: testimonial.author_name,
-              city: testimonial.author_location,
-              content: testimonial.content,
-              category: testimonial.category,
-              createdAt: testimonial.submitted_at
-            }}
-            showDate
-          />
-        ))}
-      </div>
-      
-      <div className="mt-8 text-center">
-        <Link 
-          href="/kesaksian" 
-          className="text-primary hover:underline font-medium"
-        >
-          Lihat Semua Kesaksian →
-        </Link>
-      </div>
-    </div>
+    </section>
   )
 }

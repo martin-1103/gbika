@@ -4,8 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Radio } from "lucide-react"
 
 export const metadata: Metadata = {
-  title: "Admin Login - Radio Gbika",
-  description: "Login untuk mengakses panel admin Radio Gbika",
+  title: "Admin Login - Radio El-Shaddai FM",
+  description: "Login untuk mengakses panel admin Radio El-Shaddai FM",
   robots: "noindex, nofollow"
 }
 
@@ -21,7 +21,7 @@ export default function AdminLoginPage() {
               <Radio className="h-8 w-8 text-primary-foreground" />
             </div>
           </div>
-          <h1 className="text-2xl font-bold">Radio Gbika</h1>
+          <h1 className="text-2xl font-bold">Radio El-Shaddai FM</h1>
           <p className="text-muted-foreground mt-2">Panel Administrasi</p>
         </div>
 
@@ -40,7 +40,7 @@ export default function AdminLoginPage() {
 
         {/* Footer */}
         <div className="text-center mt-6 text-sm text-muted-foreground">
-          <p>© 2024 Radio Gbika. Semua hak dilindungi.</p>
+          <p>© 2024 Radio El-Shaddai FM. Semua hak dilindungi.</p>
         </div>
       </div>
     </div>

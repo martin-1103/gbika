@@ -23,9 +23,9 @@ export default function PartnershipPage() {
         <HeroSection 
           title="Partnership"
           subtitle="Bersama Menyebarkan Injil"
-          description="Bergabunglah dengan Radio Gbika dalam misi menyebarkan Injil melalui media radio. Bersama-sama kita dapat menjangkau lebih banyak jiwa untuk kerajaan Tuhan."
+          description="Bergabunglah dengan Radio El-Shaddai FM dalam misi menyebarkan Injil melalui media radio. Bersama-sama kita dapat menjangkau lebih banyak jiwa untuk kerajaan Tuhan."
           showPlayer={false}
-          showThemeToggle={false}
+          
           backgroundImage="/partnership-bg.webp"
         />
       }

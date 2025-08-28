@@ -34,7 +34,7 @@ interface Article {
   id: string
   title: string
   slug: string
-  status: "draft" | "published"
+  status: "draft" | "published" | "scheduled"
   published_at?: string
   createdAt: string
   updatedAt: string
@@ -106,7 +106,7 @@ export default function AdminArticlesPage() {
 
   // Delete article
   const deleteArticle = async (slug: string) => {
-    if (!confirm('Apakah Anda yakin ingin menghapus artikel ini?')) {
+    if (!confirm('Apakah Anda yakin ingin menghapus renungan ini?')) {
       return
     }
 
@@ -118,7 +118,7 @@ export default function AdminArticlesPage() {
     } catch (error) {
       setState(prev => ({
         ...prev,
-        error: error instanceof Error ? error.message : 'Gagal menghapus artikel'
+        error: error instanceof Error ? error.message : 'Gagal menghapus renungan'
       }))
     }
   }
@@ -136,7 +136,20 @@ export default function AdminArticlesPage() {
 
   // Get status badge variant
   const getStatusVariant = (status: string) => {
-    return status === 'published' ? 'default' : 'secondary'
+    switch(status) {
+      case 'published': return 'default'
+      case 'scheduled': return 'outline'
+      default: return 'secondary'
+    }
+  }
+
+  // Get status label
+  const getStatusLabel = (status: string) => {
+    switch(status) {
+      case 'published': return 'Dipublikasi'
+      case 'scheduled': return 'Terjadwal'
+      default: return 'Draft'
+    }
   }
 
   // Table columns
@@ -158,7 +171,7 @@ export default function AdminArticlesPage() {
       dataIndex: "status" as keyof Article,
       render: (_: unknown, record: Article) => (
         <Badge variant={getStatusVariant(record.status)}>
-          {record.status === 'published' ? 'Dipublikasi' : 'Draft'}
+          {getStatusLabel(record.status)}
         </Badge>
       ),
     },
@@ -172,6 +185,12 @@ export default function AdminArticlesPage() {
         }
         
         const date = new Date(record.published_at)
+        
+        // Check if date is valid
+        if (isNaN(date.getTime())) {
+          return <span className="text-muted-foreground">Invalid date</span>
+        }
+        
         return (
           <div>
             <p className="text-sm">
@@ -190,6 +209,12 @@ export default function AdminArticlesPage() {
       dataIndex: "updatedAt" as keyof Article,
       render: (_: unknown, record: Article) => {
         const date = new Date(record.updatedAt)
+        
+        // Check if date is valid
+        if (isNaN(date.getTime())) {
+          return <span className="text-muted-foreground">Invalid date</span>
+        }
+        
         return (
           <div>
             <p className="text-sm">
@@ -252,17 +277,17 @@ export default function AdminArticlesPage() {
           <div>
             <h1 className="text-2xl font-bold flex items-center space-x-2">
               <FileText className="h-6 w-6" />
-              <span>Manajemen Artikel</span>
+              <span>Manajemen Renungan</span>
             </h1>
             <p className="text-muted-foreground">
-              Kelola artikel dan renungan harian website
+              Kelola renungan harian website
             </p>
           </div>
           
           <Link href="/admin/articles/edit">
             <Button>
               <Plus className="mr-2 h-4 w-4" />
-              Artikel Baru
+              Renungan Baru
             </Button>
           </Link>
         </div>
@@ -272,7 +297,7 @@ export default function AdminArticlesPage() {
           <div className="bg-card rounded-lg border p-4">
             <div className="flex items-center space-x-2">
               <FileText className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">Total Artikel</span>
+              <span className="text-sm font-medium">Total Renungan</span>
             </div>
             <p className="text-2xl font-bold mt-2">{state.totalItems}</p>
           </div>
@@ -317,7 +342,7 @@ export default function AdminArticlesPage() {
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Cari artikel..."
+              placeholder="Cari renungan..."
               value={state.searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
               className="pl-10"
@@ -346,7 +371,7 @@ export default function AdminArticlesPage() {
           {state.isLoading ? (
             <div className="flex justify-center items-center py-12">
               <Loader2 className="h-6 w-6 animate-spin mr-2" />
-              <span>Memuat artikel...</span>
+              <span>Memuat renungan...</span>
             </div>
           ) : state.articles.length > 0 ? (
             <DataTable
@@ -365,18 +390,18 @@ export default function AdminArticlesPage() {
             <div className="text-center py-12">
               <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
               <h3 className="text-lg font-semibold mb-2">
-                {state.searchQuery ? 'Artikel tidak ditemukan' : 'Belum ada artikel'}
+                {state.searchQuery ? 'Renungan tidak ditemukan' : 'Belum ada renungan'}
               </h3>
               <p className="text-muted-foreground mb-4">
                 {state.searchQuery 
-                  ? `Tidak ada artikel yang cocok dengan "${state.searchQuery}"`
-                  : 'Mulai dengan membuat artikel pertama Anda.'
+                  ? `Tidak ada renungan yang cocok dengan "${state.searchQuery}"`
+                  : 'Mulai dengan membuat renungan pertama Anda.'
                 }
               </p>
               <Link href="/admin/articles/edit">
                 <Button>
                   <Plus className="mr-2 h-4 w-4" />
-                  Buat Artikel Pertama
+                  Buat Renungan Pertama
                 </Button>
               </Link>
             </div>

@@ -5,8 +5,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Music, Users, Clock, Shield } from "lucide-react"
 
 export const metadata: Metadata = {
-  title: "Request Lagu - Radio Gbika",
-  description: "Kirimkan permintaan lagu favorit Anda untuk diputar di Radio Gbika. Bagikan pesan dan dedikasi bersama lagu pilihan Anda.",
+  title: "Request Lagu - Radio El-Shaddai FM",
+  description: "Kirimkan permintaan lagu favorit Anda untuk diputar di Radio El-Shaddai FM. Bagikan pesan dan dedikasi bersama lagu pilihan Anda.",
   keywords: ["request lagu", "permintaan lagu", "radio gbika", "musik kristen", "dedikasi lagu"]
 }
 
@@ -41,7 +41,7 @@ export default function SongRequestPage() {
                   Tentang Request Lagu
                 </h3>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Kirimkan permintaan lagu favorit Anda untuk diputar di Radio Gbika. 
+                  Kirimkan permintaan lagu favorit Anda untuk diputar di Radio El-Shaddai FM. 
                   Bagikan pesan dan dedikasi khusus bersama lagu pilihan Anda.
                 </p>
                 <p className="text-sm text-muted-foreground">

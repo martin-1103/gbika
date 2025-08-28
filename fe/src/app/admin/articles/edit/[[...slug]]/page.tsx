@@ -20,7 +20,8 @@ interface ArticleData {
   title: string
   slug: string
   content: string
-  status: "draft" | "published"
+  status: "draft" | "published" | "scheduled"
+  published_at?: string
 }
 
 interface EditArticleState {
@@ -48,11 +49,11 @@ export default function AdminArticleEditPage() {
     try {
       setState(prev => ({ ...prev, isLoading: true, error: null }))
       
-      const article = await apiClient.get(`/api/articles/${articleSlug}`)
+      const response = await apiClient.get(`/articles/${articleSlug}`)
       
       setState(prev => ({
         ...prev,
-        article: article.data,
+        article: response.data.data, // API returns { success, data, message }
         isLoading: false,
         error: null
       }))
@@ -198,26 +199,6 @@ export default function AdminArticleEditPage() {
           </div>
         )}
 
-        {/* Tips for Writing */}
-        {(state.mode === "create" || state.article) && !state.isLoading && (
-          <div className="bg-muted/50 rounded-lg p-6">
-            <h3 className="font-semibold mb-3">💡 Tips Menulis Artikel</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
-              <ul className="space-y-1">
-                <li>• Gunakan judul yang menarik dan deskriptif</li>
-                <li>• Mulai dengan paragraf pembuka yang kuat</li>
-                <li>• Gunakan sub-heading untuk struktur yang jelas</li>
-                <li>• Sertakan ayat Alkitab yang relevan</li>
-              </ul>
-              <ul className="space-y-1">
-                <li>• Gunakan bahasa yang mudah dipahami</li>
-                <li>• Berikan contoh praktis dalam kehidupan</li>
-                <li>• Akhiri dengan doa atau refleksi</li>
-                <li>• Periksa tata bahasa sebelum menyimpan</li>
-              </ul>
-            </div>
-          </div>
-        )}
       </div>
     </AdminLayout>
   )

@@ -62,7 +62,7 @@ function TestimonialsContent() {
         limit: '9' // 3x3 grid
       })
       
-      const response = await apiClient.get(`/api/testimonials?${params}`)
+      const response = await apiClient.get(`/testimonials?${params}`)
       
       setState(prev => ({
         ...prev,
@@ -133,7 +133,7 @@ function TestimonialsContent() {
           subtitle="Kuasa Tuhan Nyata"
           description="Baca kisah-kisah luar biasa tentang bagaimana Tuhan bekerja dalam kehidupan umat-Nya. Mari saling menguatkan dalam iman."
           showPlayer={false}
-          showThemeToggle={false}
+          
           backgroundImage="/testimony-bg.webp"
         />
       }

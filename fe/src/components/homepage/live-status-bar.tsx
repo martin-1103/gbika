@@ -185,7 +185,7 @@ export function LiveStatusBar() {
               {!liveStatus.isLive && (
                 <div className="space-y-2">
                   <h1 className="text-2xl md:text-3xl font-bold">
-                    Radio Gbika
+                    Radio El-Shaddai FM
                   </h1>
                   <p className="text-muted-foreground text-lg">
                     Menyebarkan kasih Kristus melalui udara

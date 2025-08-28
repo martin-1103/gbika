@@ -5,7 +5,6 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { ThemeToggle } from "@/components/theme-toggle"
 import { AuthGuard } from "@/components/auth"
 import { useAuthStore } from "@/stores/auth-store"
 import {
@@ -42,7 +41,7 @@ export function AdminLayout({ children, requiredRoles = ['admin', 'editor', 'mod
     },
     {
       href: "/admin/articles",
-      label: "Artikel & Renungan",
+      label: "Renungan",
       icon: FileText,
     },
     {
@@ -184,9 +183,6 @@ export function AdminLayout({ children, requiredRoles = ['admin', 'editor', 'mod
               {/* Page title will be set by individual pages */}
               Admin Panel
             </h1>
-          </div>
-          <div className="flex items-center space-x-2">
-            <ThemeToggle />
           </div>
         </header>
 

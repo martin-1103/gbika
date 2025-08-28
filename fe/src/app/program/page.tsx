@@ -200,7 +200,7 @@ export default function ProgramPage() {
           subtitle="Siaran El Shaddai FM"
           description="Temukan jadwal lengkap program-program siaran El Shaddai FM. Jangan lewatkan program favorit Anda setiap harinya!"
           showPlayer={false}
-          showThemeToggle={false}
+          
           backgroundImage="/program-bg.webp"
         />
       }

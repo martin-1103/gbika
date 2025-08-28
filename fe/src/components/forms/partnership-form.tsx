@@ -110,7 +110,7 @@ export function PartnershipForm({ className }: PartnershipFormProps) {
           Daftar Sebagai Partner
         </CardTitle>
         <CardDescription>
-          Bergabunglah dengan program kemitraan Radio Gbika dan jadilah bagian 
+          Bergabunglah dengan program kemitraan Radio El-Shaddai FM dan jadilah bagian 
           dari pelayanan yang memberkati banyak orang.
         </CardDescription>
       </CardHeader>
@@ -253,7 +253,7 @@ export function PartnershipForm({ className }: PartnershipFormProps) {
         <div className="mt-6 p-4 bg-muted/50 rounded-lg">
           <p className="text-sm text-muted-foreground text-center">
             <strong>Catatan:</strong> Dengan mendaftar sebagai partner, Anda menyetujui 
-            untuk bekerja sama dalam menyebarkan pesan kasih Kristus melalui Radio Gbika. 
+            untuk bekerja sama dalam menyebarkan pesan kasih Kristus melalui Radio El-Shaddai FM. 
             Tim kami akan menghubungi Anda untuk membahas detail kemitraan.
           </p>
         </div>

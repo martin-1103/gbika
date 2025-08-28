@@ -60,11 +60,14 @@ export default function RenunganDetailPage() {
   // Fetch related articles
   const fetchRelatedArticles = useCallback(async () => {
     try {
-      const data = await apiClient.get('/articles?limit=4&sort_by=published_at&sort_order=desc')
+      const response = await apiClient.get('/articles?limit=4&sort_by=published_at&sort_order=desc')
+      
+      // Ensure response.data.data is an array before filtering (API returns { success, data, message })
+      const articles = Array.isArray(response.data.data) ? response.data.data : []
       
       setState(prev => ({
         ...prev,
-        relatedArticles: (data.data || []).filter((article: Article) => article.slug !== slug).slice(0, 3),
+        relatedArticles: articles.filter((article: Article) => article.slug !== slug).slice(0, 3),
         isLoadingRelated: false
       }))
     } catch {
@@ -77,11 +80,11 @@ export default function RenunganDetailPage() {
     try {
       setState(prev => ({ ...prev, isLoading: true, error: null }))
       
-      const article = await apiClient.get(`/api/articles/${articleSlug}`)
+      const response = await apiClient.get(`/articles/${articleSlug}`)
       
       setState(prev => ({
         ...prev,
-        article: article.data,
+        article: response.data.data, // API returns { success, data, message }
         isLoading: false,
         error: null
       }))
@@ -125,14 +128,32 @@ export default function RenunganDetailPage() {
     }
   }
 
-  // Format article content with basic styling
-  const formatContent = (content: string) => {
-    // Simple paragraph breaks
-    return content.split('\n\n').map((paragraph, index) => (
-      <p key={index} className="mb-4 leading-relaxed text-justify">
-        {paragraph.trim()}
-      </p>
-    ))
+  // Format article content (supports both HTML and plain text)
+  const formatContent = (content: string | undefined) => {
+    // Handle undefined or null content
+    if (!content) {
+      return <p className="text-muted-foreground">Konten tidak tersedia</p>
+    }
+    
+    // Check if content contains HTML tags
+    const hasHtmlTags = /<[a-z][\s\S]*>/i.test(content)
+    
+    if (hasHtmlTags) {
+      // Render HTML content directly
+      return (
+        <div 
+          className="prose prose-lg max-w-none"
+          dangerouslySetInnerHTML={{ __html: content }}
+        />
+      )
+    } else {
+      // Fallback for plain text content - simple paragraph breaks
+      return content.split('\n\n').map((paragraph, index) => (
+        <p key={index} className="mb-4 leading-relaxed text-justify">
+          {paragraph.trim()}
+        </p>
+      ))
+    }
   }
 
   // Format published date
@@ -267,10 +288,8 @@ export default function RenunganDetailPage() {
                   <Separator className="mb-8" />
 
                   {/* Article Content */}
-                  <div className="prose prose-lg max-w-none">
-                    <div className="text-lg leading-relaxed text-gray-800">
-                      {formatContent(state.article.content)}
-                    </div>
+                  <div className="text-lg leading-relaxed text-gray-800">
+                    {formatContent(state.article.content)}
                   </div>
 
                   <Separator className="mt-8 mb-6" />

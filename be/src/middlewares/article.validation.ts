@@ -25,13 +25,23 @@ export const validateListArticles = [
   
   query('sort_by')
     .optional()
-    .isIn(['published_at', 'createdAt', 'title'])
-    .withMessage('Sort by must be one of: published_at, createdAt, title'),
+    .isIn(['published_at', 'createdAt', 'updatedAt', 'title'])
+    .withMessage('Sort by must be one of: published_at, createdAt, updatedAt, title'),
   
   query('sort_order')
     .optional()
     .isIn(['asc', 'desc'])
     .withMessage('Sort order must be either asc or desc'),
+  
+  query('admin')
+    .optional()
+    .isIn(['true', 'false'])
+    .withMessage('Admin must be either true or false'),
+  
+  query('search')
+    .optional()
+    .isLength({ max: 255 })
+    .withMessage('Search query must not exceed 255 characters'),
   
   // Handle validation errors
   (req: Request, res: Response, next: NextFunction) => {
@@ -118,15 +128,40 @@ export const validateUpdateArticle = [
   // Validate status (optional for updates)
   body('status')
     .optional()
-    .isIn(['draft', 'published'])
-    .withMessage('Status must be either draft or published'),
+    .isIn(['draft', 'published', 'scheduled'])
+    .withMessage('Status must be either draft, published, or scheduled'),
+  
+  // Validate published_at for scheduled posts (updates)
+  body('published_at')
+    .optional()
+    .isISO8601()
+    .withMessage('Published date must be a valid ISO8601 date string')
+    .custom((value, { req }) => {
+      if (req.body.status === 'scheduled' && !value) {
+        throw new Error('Published date is required for scheduled articles');
+      }
+      // For updates, allow existing scheduled dates even if they're in the past
+      // Only validate future date if we're changing status to scheduled with a new date
+      if (value && req.body.status === 'scheduled') {
+        const scheduledDate = new Date(value);
+        const now = new Date();
+        
+        // Allow past dates for existing scheduled articles being updated
+        // Only require future dates for new scheduled articles (status change from non-scheduled to scheduled)
+        if (scheduledDate <= now) {
+          // This is more permissive for updates - we'll let the service layer handle the business logic
+          console.log(`Warning: Scheduled date ${value} is in the past, but allowing for update`);
+        }
+      }
+      return true;
+    }),
   
   // Ensure at least one field is provided for update
   body()
     .custom((value, { req }) => {
-      const { title, content, slug, status } = req.body;
-      if (!title && !content && !slug && !status) {
-        throw new Error('At least one field (title, content, slug, or status) must be provided for update');
+      const { title, content, slug, status, published_at } = req.body;
+      if (!title && !content && !slug && !status && !published_at) {
+        throw new Error('At least one field (title, content, slug, status, or published_at) must be provided for update');
       }
       return true;
     }),
@@ -206,11 +241,24 @@ export const validateCreateArticle = [
   
   body('status')
     .optional()
-    .isIn(['draft', 'published'])
-    .withMessage('Status must be either draft or published')
+    .isIn(['draft', 'published', 'scheduled'])
+    .withMessage('Status must be either draft, published, or scheduled')
     .default('draft'),
   
-  
+  // Validate published_at for scheduled posts
+  body('published_at')
+    .optional()
+    .isISO8601()
+    .withMessage('Published date must be a valid ISO8601 date string')
+    .custom((value, { req }) => {
+      if (req.body.status === 'scheduled' && !value) {
+        throw new Error('Published date is required for scheduled articles');
+      }
+      if (value && new Date(value) <= new Date()) {
+        throw new Error('Published date must be in the future');
+      }
+      return true;
+    }),
   
   // Handle validation errors
   (req: Request, res: Response, next: NextFunction) => {

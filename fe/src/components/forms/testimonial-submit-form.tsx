@@ -306,7 +306,7 @@ export function TestimonialSubmitForm({ className }: TestimonialSubmitFormProps)
         <div className="mt-6 text-center text-sm text-muted-foreground">
           <p>Kesaksian Anda akan ditinjau terlebih dahulu sebelum dipublikasikan.</p>
           <p className="mt-1">
-            Dengan mengirim kesaksian, Anda menyetujui untuk berbagi cerita Anda dengan komunitas Radio Gbika.
+            Dengan mengirim kesaksian, Anda menyetujui untuk berbagi cerita Anda dengan komunitas Radio El-Shaddai FM.
           </p>
         </div>
       </CardContent>

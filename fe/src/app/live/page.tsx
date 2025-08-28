@@ -3,7 +3,7 @@ import { PublicLayout } from "@/components/layout/public-layout"
 import { AudioPlayer, LiveChat } from "@/components/live"
 
 export const metadata: Metadata = {
-  title: "Dengarkan Live - Radio Gbika",
+  title: "Dengarkan Live - Radio El-Shaddai FM",
   description: "Dengarkan siaran radio Gbika secara langsung dan berinteraksi melalui chat live dengan penyiar dan pendengar lainnya.",
   keywords: ["radio gbika", "live streaming", "chat live", "siaran langsung", "radio kristen"]
 }

@@ -112,32 +112,43 @@ export function LatestArticles({ className }: LatestArticlesProps) {
   if (loading) {
     return (
       <div className={className}>
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">
-            <BookOpen className="w-6 h-6" />
-            Renungan Terbaru
-          </h2>
-          <p className="text-muted-foreground">
-            Firman Tuhan untuk menguatkan iman Anda
-          </p>
-        </div>
-        
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(3)].map((_, i) => (
-            <Card key={i}>
-              <CardHeader>
-                <Skeleton className="h-4 w-3/4" />
-                <Skeleton className="h-3 w-1/2" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-20 w-full mb-4" />
-                <div className="flex gap-2">
-                  <Skeleton className="h-5 w-16" />
-                  <Skeleton className="h-5 w-16" />
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+        {/* Background with hero gradient - Full Width */}
+        <div 
+          className="relative w-full p-8 my-8"
+          style={{
+            background: 'var(--hero-gradient)',
+          }}
+        >
+          {/* Content overlay */}
+          <div className="relative z-10">
+            <div className="mb-6 text-center">
+              <h2 className="text-2xl font-bold mb-2 flex items-center justify-center gap-2 text-white">
+                <BookOpen className="w-6 h-6" />
+                Renungan Terbaru
+              </h2>
+              <p className="text-white/80">
+                Firman Tuhan untuk menguatkan iman Anda
+              </p>
+            </div>
+            
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(3)].map((_, i) => (
+                <Card key={i} className="bg-card rounded-xl shadow-sm border-0">
+                  <CardHeader>
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-3 w-1/2" />
+                  </CardHeader>
+                  <CardContent>
+                    <Skeleton className="h-20 w-full mb-4" />
+                    <div className="flex gap-2">
+                      <Skeleton className="h-5 w-16" />
+                      <Skeleton className="h-5 w-16" />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     )
@@ -146,17 +157,28 @@ export function LatestArticles({ className }: LatestArticlesProps) {
   if (error) {
     return (
       <div className={className}>
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">
-            <BookOpen className="w-6 h-6" />
-            Renungan Terbaru
-          </h2>
+        {/* Background with hero gradient - Full Width */}
+         <div 
+           className="relative w-full p-8 my-8"
+           style={{
+             background: 'var(--hero-gradient)',
+           }}
+         >
+          {/* Content overlay */}
+          <div className="relative z-10">
+            <div className="mb-6 text-center">
+              <h2 className="text-2xl font-bold mb-2 flex items-center justify-center gap-2 text-white">
+                <BookOpen className="w-6 h-6" />
+                Renungan Terbaru
+              </h2>
+            </div>
+            <Card className="bg-card rounded-xl shadow-sm border-0">
+              <CardContent className="py-8">
+                <p className="text-muted-foreground text-center">{error}</p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
-        <Card>
-          <CardContent className="py-8">
-            <p className="text-muted-foreground text-center">{error}</p>
-          </CardContent>
-        </Card>
       </div>
     )
   }
@@ -164,38 +186,58 @@ export function LatestArticles({ className }: LatestArticlesProps) {
   if (articles.length === 0) {
     return (
       <div className={className}>
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">
-            <BookOpen className="w-6 h-6" />
-            Renungan Terbaru
-          </h2>
+        {/* Background with hero gradient - Full Width */}
+         <div 
+           className="relative w-full p-8 my-8"
+           style={{
+             background: 'var(--hero-gradient)',
+           }}
+         >
+          {/* Content overlay */}
+          <div className="relative z-10">
+            <div className="mb-6 text-center">
+              <h2 className="text-2xl font-bold mb-2 flex items-center justify-center gap-2 text-white">
+                <BookOpen className="w-6 h-6" />
+                Renungan Terbaru
+              </h2>
+            </div>
+            <Card className="bg-card rounded-xl shadow-sm border-0">
+              <CardContent className="py-8">
+                <p className="text-muted-foreground text-center">
+                  Belum ada artikel tersedia
+                </p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
-        <Card>
-          <CardContent className="py-8">
-            <p className="text-muted-foreground text-center">
-              Belum ada artikel tersedia
-            </p>
-          </CardContent>
-        </Card>
       </div>
     )
   }
 
   return (
     <div className={className}>
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">
-          <BookOpen className="w-6 h-6" />
-          Renungan Terbaru
-        </h2>
-        <p className="text-muted-foreground">
-          Firman Tuhan untuk menguatkan iman Anda
-        </p>
-      </div>
+      {/* Background with hero gradient - Full Width */}
+      <div 
+        className="relative w-full p-8 my-8"
+        style={{
+          background: 'var(--hero-gradient)',
+        }}
+      >
+        {/* Content overlay */}
+        <div className="relative z-10">
+          <div className="mb-6 text-center">
+            <h2 className="text-2xl font-bold mb-2 flex items-center justify-center gap-2 text-white">
+              <BookOpen className="w-6 h-6" />
+              Renungan Terbaru
+            </h2>
+            <p className="text-white/80">
+              Firman Tuhan untuk menguatkan iman Anda
+            </p>
+          </div>
       
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {articles.map((article) => (
-          <Card key={article.id} className="group hover:shadow-lg transition-shadow">
+          <Card key={article.id} className="bg-card rounded-xl shadow-sm border-0 group hover:shadow-md transition-all duration-200 hover:-translate-y-1">
             <CardHeader>
               <div className="flex items-start justify-between gap-2">
                 <CardTitle className="text-lg leading-tight group-hover:text-primary transition-colors">
@@ -233,13 +275,15 @@ export function LatestArticles({ className }: LatestArticlesProps) {
         ))}
       </div>
       
-      <div className="mt-8 text-center">
-        <Link 
-          href="/renungan" 
-          className="text-primary hover:underline font-medium"
-        >
-          Lihat Semua Renungan →
-        </Link>
+          <div className="mt-8 text-center">
+            <Link 
+              href="/renungan" 
+              className="text-white hover:text-white/80 hover:underline font-medium"
+            >
+              Lihat Semua Renungan →
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   )

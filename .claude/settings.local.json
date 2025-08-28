@@ -6,7 +6,13 @@
       "Bash(curl:*)",
       "Bash(npm run lint)",
       "Bash(npx tsc:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(find:*)",
+      "Bash(npx tsx:*)",
+      "Bash(npx prisma:*)",
+      "Bash(npm install:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(npm run dev:*)"
     ],
     "deny": [],
     "ask": []

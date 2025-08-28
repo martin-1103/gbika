@@ -141,7 +141,7 @@ export function LiveChatModeration({ className }: LiveChatModerationProps) {
         return
       }
 
-      const response = await fetch(`/api/livechat/messages/${messageId}/moderate`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/livechat/messages/${messageId}/moderate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

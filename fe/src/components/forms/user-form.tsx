@@ -96,7 +96,7 @@ export function UserForm({
   const loadUser = useCallback(async () => {
     try {
       setIsLoadingData(true)
-      const data = await apiClient.get(`/api/users/${userId}`)
+      const data = await apiClient.get(`/users/${userId}`)
       
       setFormData({
         name: data.data?.name || "",

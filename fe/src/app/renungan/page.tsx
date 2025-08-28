@@ -173,7 +173,7 @@ function RenunganContent() {
           subtitle="Firman yang Membangun"
           description="Perkuat iman Anda dengan renungan-renungan yang membangun dan menginspirasi. Temukan makna mendalam dalam setiap artikel rohani kami."
           showPlayer={false}
-          showThemeToggle={false}
+          
           backgroundImage="/devotion-bg.webp"
         />
       }

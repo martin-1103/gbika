@@ -110,9 +110,9 @@ export default function KontakPage() {
         <HeroSection 
           title="Mari Terhubung"
           subtitle="Hubungi Kami"
-          description="Kami senang mendengar dari Anda. Hubungi kami untuk pertanyaan, saran, atau kerjasama yang dapat membangun pelayanan Radio Gbika."
+          description="Kami senang mendengar dari Anda. Hubungi kami untuk pertanyaan, saran, atau kerjasama yang dapat membangun pelayanan Radio El-Shaddai FM."
           showPlayer={false}
-          showThemeToggle={false}
+          
           backgroundImage="/contact-bg.webp"
         />
       }
@@ -130,7 +130,7 @@ export default function KontakPage() {
                   Informasi Kontak
                 </CardTitle>
                 <CardDescription>
-                  Cara terbaik untuk menghubungi Radio Gbika
+                  Cara terbaik untuk menghubungi Radio El-Shaddai FM
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -139,7 +139,7 @@ export default function KontakPage() {
                   <div>
                     <h3 className="font-medium">Alamat</h3>
                     <p className="text-sm text-muted-foreground">
-                      Jl. Radio Gbika No. 123<br />
+                      Jl. Radio El-Shaddai FM No. 123<br />
                       Jakarta Selatan, 12345<br />
                       Indonesia
                     </p>
@@ -411,7 +411,7 @@ export default function KontakPage() {
               <CardHeader>
                 <CardTitle>Lokasi Kami</CardTitle>
                 <CardDescription>
-                  Kunjungi studio Radio Gbika
+                  Kunjungi studio Radio El-Shaddai FM
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -472,7 +472,7 @@ export default function KontakPage() {
               <div>
                 <h3 className="font-semibold mb-2">Kapan jadwal siaran?</h3>
                 <p className="text-sm text-muted-foreground">
-                  Radio Gbika mengudara 24/7. Lihat jadwal program lengkap di 
+                  Radio El-Shaddai FM mengudara 24/7. Lihat jadwal program lengkap di 
                   halaman &quot;Program & Jadwal&quot; untuk program-program spesial.
                 </p>
               </div>

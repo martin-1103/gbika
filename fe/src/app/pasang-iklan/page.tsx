@@ -104,9 +104,9 @@ export default function PasangIklanPage() {
         <HeroSection 
           title="Jangkau Ribuan Pendengar Setia"
           subtitle="Pasang Iklan"
-          description="Promosikan bisnis Anda melalui Radio Gbika dan capai audiens yang tepat dengan program-program berkualitas dan nilai-nilai Kristiani."
+          description="Promosikan bisnis Anda melalui Radio El-Shaddai FM dan capai audiens yang tepat dengan program-program berkualitas dan nilai-nilai Kristiani."
           showPlayer={false}
-          showThemeToggle={false}
+          
           backgroundImage="/advertising-bg.webp"
         />
       }
@@ -115,7 +115,7 @@ export default function PasangIklanPage() {
 
         {/* Stats Section */}
         <div className="bg-primary/5 rounded-2xl p-8">
-          <h2 className="text-3xl font-bold text-center mb-8">Mengapa Radio Gbika?</h2>
+          <h2 className="text-3xl font-bold text-center mb-8">Mengapa Radio El-Shaddai FM?</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {stats.map((stat, index) => (
               <div key={index} className="text-center">
@@ -129,7 +129,7 @@ export default function PasangIklanPage() {
 
         {/* Benefits Section */}
         <div className="space-y-8">
-          <h2 className="text-3xl font-bold text-center">Keunggulan Beriklan di Radio Gbika</h2>
+          <h2 className="text-3xl font-bold text-center">Keunggulan Beriklan di Radio El-Shaddai FM</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {benefits.map((benefit, index) => (
               <Card key={index} className="text-center">
@@ -274,7 +274,7 @@ export default function PasangIklanPage() {
                   </div>
                 </div>
                 <p className="text-muted-foreground italic">
-                  &quot;Iklan di Radio Gbika sangat efektif untuk menjangkau target market kami. 
+                  &quot;Iklan di Radio El-Shaddai FM sangat efektif untuk menjangkau target market kami. 
                   Tim professional dan hasil yang memuaskan!&quot;
                 </p>
               </CardContent>
@@ -292,7 +292,7 @@ export default function PasangIklanPage() {
                   </div>
                 </div>
                 <p className="text-muted-foreground italic">
-                  &quot;Setelah iklan di Radio Gbika, penjualan meningkat 40%. Audiensnya 
+                  &quot;Setelah iklan di Radio El-Shaddai FM, penjualan meningkat 40%. Audiensnya 
                   sangat tepat dengan target pasar kami.&quot;
                 </p>
               </CardContent>
@@ -318,7 +318,7 @@ export default function PasangIklanPage() {
           <CardHeader>
             <CardTitle>Pertanyaan Umum</CardTitle>
             <CardDescription>
-              Jawaban untuk pertanyaan yang sering diajukan tentang iklan di Radio Gbika
+              Jawaban untuk pertanyaan yang sering diajukan tentang iklan di Radio El-Shaddai FM
             </CardDescription>
           </CardHeader>
           <CardContent>

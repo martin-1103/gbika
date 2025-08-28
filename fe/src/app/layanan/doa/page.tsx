@@ -5,8 +5,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Heart, Users, Clock, Shield } from "lucide-react"
 
 export const metadata: Metadata = {
-  title: "Layanan Doa - Radio Gbika",
-  description: "Kirimkan permohonan doa Anda kepada tim doa Radio Gbika. Kami akan mendoakan Anda dengan sepenuh hati dan dalam kerahasiaan.",
+  title: "Layanan Doa - Radio El-Shaddai FM",
+  description: "Kirimkan permohonan doa Anda kepada tim doa Radio El-Shaddai FM. Kami akan mendoakan Anda dengan sepenuh hati dan dalam kerahasiaan.",
   keywords: ["layanan doa", "permohonan doa", "radio gbika", "doa kristen", "tim doa"]
 }
 
@@ -43,7 +43,7 @@ export default function PrayerServicePage() {
                   Tentang Layanan Doa
                 </h3>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Tim doa Radio Gbika terdiri dari hamba-hamba Tuhan yang berpengalaman 
+                  Tim doa Radio El-Shaddai FM terdiri dari hamba-hamba Tuhan yang berpengalaman 
                   dan berkomitmen untuk mendoakan setiap permohonan yang masuk dengan 
                   sepenuh hati.
                 </p>

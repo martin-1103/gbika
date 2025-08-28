@@ -23,7 +23,7 @@ export default function SubmitTestimonialPage() {
           subtitle="Bagikan Berkat Tuhan"
           description="Bagikan pengalaman luar biasa Anda dengan Tuhan. Kesaksian Anda dapat menjadi berkat dan kekuatan bagi saudara seiman lainnya."
           showPlayer={false}
-          showThemeToggle={false}
+          
           backgroundImage="/testimony-submit-bg.webp"
         />
       }
@@ -229,7 +229,7 @@ export default function SubmitTestimonialPage() {
                     </p>
                     
                     <p>
-                      Kesaksian yang telah dipublikasikan menjadi milik Radio Gbika 
+                      Kesaksian yang telah dipublikasikan menjadi milik Radio El-Shaddai FM 
                       dan dapat digunakan untuk berbagai media publikasi.
                     </p>
                   </div>

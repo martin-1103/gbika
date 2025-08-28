@@ -12,12 +12,13 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Save, Eye, FileText, Loader2, AlertCircle } from "lucide-react"
 import { apiClient, isAxiosError } from "@/lib/api/client"
+import { DateTimeInput, RichTextEditor } from "@/components/ui"
 
 interface ArticleFormData {
   title: string
   slug: string
   content: string
-  status: "draft" | "published"
+  published_at?: string // Publication datetime
 }
 
 interface ArticleFormProps {
@@ -39,7 +40,7 @@ export function ArticleForm({
     title: initialData?.title || "",
     slug: initialData?.slug || "",
     content: initialData?.content || "",
-    status: initialData?.status || "draft"
+    published_at: initialData?.published_at ? new Date(initialData.published_at).toISOString().slice(0, 16) : ""
   })
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -78,22 +79,32 @@ export function ArticleForm({
     handleInputChange('slug', value)
   }
 
-  // Handle status change
-  const handleStatusChange = (status: "draft" | "published") => {
-    setFormData(prev => ({ ...prev, status }))
+  // Handle publication date change
+  const handlePublishedAtChange = (value: string) => {
+    setFormData(prev => ({ ...prev, published_at: value }))
+    if (error) setError(null)
   }
 
-  // Submit form
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  // Submit form with action (save as draft or publish)
+  const handleSubmit = async (action: 'save' | 'publish') => {
     setIsLoading(true)
     setError(null)
 
     try {
+      const submitData = {
+        ...formData,
+        status: action === 'publish' ? (formData.published_at ? 'scheduled' : 'published') : 'draft'
+      }
+
+      // If publishing without a date, set current time
+      if (action === 'publish' && !formData.published_at) {
+        submitData.published_at = new Date().toISOString()
+      }
+      
       if (mode === 'create') {
-        await apiClient.post('/articles', formData)
+        await apiClient.post('/articles', submitData)
       } else {
-        await apiClient.put(`/articles/${slug}`, formData)
+        await apiClient.put(`/articles/${slug}`, submitData)
       }
       
       // Call success callback or redirect
@@ -118,9 +129,25 @@ export function ArticleForm({
                      formData.slug.trim() !== '' && 
                      formData.content.trim() !== ''
 
-  // Get status badge variant
-  const getStatusVariant = (status: string) => {
-    return status === 'published' ? 'default' : 'secondary'
+  // Get current article status for display
+  const getArticleStatus = () => {
+    if (!initialData) return 'Draft Baru'
+    
+    if (initialData.status === 'published') {
+      return 'Dipublikasikan'
+    } else if (initialData.status === 'scheduled') {
+      return 'Terjadwal'
+    }
+    return 'Draft'
+  }
+
+  // Get badge variant for status
+  const getStatusBadgeVariant = () => {
+    if (!initialData) return 'secondary'
+    
+    if (initialData.status === 'published') return 'default'
+    if (initialData.status === 'scheduled') return 'outline'
+    return 'secondary'
   }
 
   return (
@@ -141,14 +168,14 @@ export function ArticleForm({
               </CardDescription>
             </div>
           </div>
-          <Badge variant={getStatusVariant(formData.status)}>
-            {formData.status === 'published' ? 'Dipublikasikan' : 'Draft'}
+          <Badge variant={getStatusBadgeVariant()}>
+            {getArticleStatus()}
           </Badge>
         </div>
       </CardHeader>
       
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="space-y-6">
           {/* Title Field */}
           <div className="space-y-2">
             <Label htmlFor="title">Judul Artikel *</Label>
@@ -193,47 +220,27 @@ export function ArticleForm({
           {/* Content Field */}
           <div className="space-y-2">
             <Label htmlFor="content">Konten Artikel *</Label>
-            <Textarea
-              id="content"
-              placeholder="Tulis konten artikel di sini..."
+            <RichTextEditor
               value={formData.content}
-              onChange={(e) => handleInputChange('content', e.target.value)}
+              onChange={(value) => handleInputChange('content', value)}
               disabled={isLoading}
-              required
-              className="min-h-[400px] resize-y"
+              placeholder="Tulis konten artikel di sini..."
+              height={500}
             />
-            <p className="text-sm text-muted-foreground">
-              Mendukung format teks biasa. Rich text editor akan ditambahkan di versi mendatang.
-            </p>
           </div>
 
           <Separator />
 
-          {/* Status Selection */}
-          <div className="space-y-3">
-            <Label>Status Publikasi</Label>
-            <div className="flex space-x-4">
-              <Button
-                type="button"
-                variant={formData.status === 'draft' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => handleStatusChange('draft')}
-                disabled={isLoading}
-              >
-                <Eye className="mr-2 h-4 w-4" />
-                Simpan sebagai Draft
-              </Button>
-              <Button
-                type="button"
-                variant={formData.status === 'published' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => handleStatusChange('published')}
-                disabled={isLoading}
-              >
-                <FileText className="mr-2 h-4 w-4" />
-                Publikasikan
-              </Button>
-            </div>
+          {/* Publication Time Setting */}
+          <div className="space-y-2">
+            <Label htmlFor="published_at">Waktu Publikasi (Opsional)</Label>
+            <DateTimeInput
+              id="published_at"
+              value={formData.published_at}
+              onChange={handlePublishedAtChange}
+              disabled={isLoading}
+              min={new Date(Date.now() + 5 * 60 * 1000).toISOString()}
+            />
           </div>
 
           {/* Error Message */}
@@ -255,24 +262,46 @@ export function ArticleForm({
               Batal
             </Button>
             
-            <Button
-              type="submit"
-              disabled={!isFormValid || isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {mode === 'create' ? 'Membuat...' : 'Memperbarui...'}
-                </>
-              ) : (
-                <>
-                  <Save className="mr-2 h-4 w-4" />
-                  {mode === 'create' ? 'Buat Artikel' : 'Perbarui Artikel'}
-                </>
-              )}
-            </Button>
+            <div className="flex gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => handleSubmit('save')}
+                disabled={!isFormValid || isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Menyimpan...
+                  </>
+                ) : (
+                  <>
+                    <Save className="mr-2 h-4 w-4" />
+                    Simpan Draft
+                  </>
+                )}
+              </Button>
+              
+              <Button
+                type="button"
+                onClick={() => handleSubmit('publish')}
+                disabled={!isFormValid || isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Memublikasikan...
+                  </>
+                ) : (
+                  <>
+                    <FileText className="mr-2 h-4 w-4" />
+                    {formData.published_at ? 'Jadwalkan' : 'Publikasikan'}
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
-        </form>
+        </div>
       </CardContent>
     </Card>
   )

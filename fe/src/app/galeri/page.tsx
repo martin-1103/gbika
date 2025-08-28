@@ -25,7 +25,7 @@ const galleryItems = [
     id: "1",
     type: "image",
     title: "Ibadah Minggu Pagi",
-    description: "Suasana khidmat ibadah minggu pagi di studio Radio Gbika",
+    description: "Suasana khidmat ibadah minggu pagi di studio Radio El-Shaddai FM",
     imageUrl: "/images/gallery/worship-1.jpg",
     category: "ibadah",
     date: "2024-12-15",
@@ -36,7 +36,7 @@ const galleryItems = [
     id: "2",
     type: "image", 
     title: "Tim Penyiar Bersama",
-    description: "Foto bersama tim penyiar Radio Gbika dalam acara gathering tahunan",
+    description: "Foto bersama tim penyiar Radio El-Shaddai FM dalam acara gathering tahunan",
     imageUrl: "/images/gallery/team-1.jpg",
     category: "tim",
     date: "2024-12-10",
@@ -59,7 +59,7 @@ const galleryItems = [
     id: "4",
     type: "image",
     title: "Acara Charity",
-    description: "Kegiatan bakti sosial Radio Gbika untuk masyarakat sekitar",
+    description: "Kegiatan bakti sosial Radio El-Shaddai FM untuk masyarakat sekitar",
     imageUrl: "/images/gallery/charity-1.jpg", 
     category: "acara",
     date: "2024-12-05",
@@ -124,7 +124,7 @@ const categories = [
   { value: "pelatihan", label: "Pelatihan", count: galleryItems.filter(i => i.category === "pelatihan").length }
 ]
 
-// Gallery page: Photos and videos from Radio Gbika activities
+// Gallery page: Photos and videos from Radio El-Shaddai FM activities
 export default function GaleriPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
@@ -163,7 +163,7 @@ export default function GaleriPage() {
             <span className="block text-primary">Berharga</span>
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Dokumentasi kegiatan, program, dan momen istimewa dalam perjalanan pelayanan Radio Gbika.
+            Dokumentasi kegiatan, program, dan momen istimewa dalam perjalanan pelayanan Radio El-Shaddai FM.
           </p>
         </div>
 
@@ -395,7 +395,7 @@ export default function GaleriPage() {
         <div className="text-center bg-primary/5 rounded-2xl p-8 space-y-4">
           <h2 className="text-2xl font-bold">Punya Foto atau Video?</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Jika Anda memiliki dokumentasi kegiatan Radio Gbika yang ingin dibagikan, 
+            Jika Anda memiliki dokumentasi kegiatan Radio El-Shaddai FM yang ingin dibagikan, 
             silakan hubungi tim media kami.
           </p>
           <Button size="lg">

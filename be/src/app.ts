@@ -9,13 +9,19 @@ import testimonialRouter from './routes/testimonial.routes';
 import { programRouter } from './routes/program.routes';
 import pageRouter from './routes/page.routes';
 import livechatRouter from './routes/livechat.routes';
+import { schedulerRouter } from './routes/scheduler.routes';
 import { errorMiddleware } from './middlewares/error.middleware';
 
 const app: Application = express();
 
 // Enable CORS and request parsing
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3002',
+  origin: [
+    process.env.FRONTEND_URL || 'http://localhost:3001',
+    'http://localhost:3001',
+    'http://localhost:3000',
+    'http://localhost:3002'
+  ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
@@ -42,6 +48,7 @@ app.use('/api/testimonials', testimonialRouter);
 app.use('/api/programs', programRouter);
 app.use('/api/pages', pageRouter);
 app.use('/api/livechat', livechatRouter);
+app.use('/api/scheduler', schedulerRouter);
 
 // Error handling
 app.use(errorMiddleware);

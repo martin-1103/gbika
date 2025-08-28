@@ -144,7 +144,7 @@ export function SongRequestForm({ className }: SongRequestFormProps) {
           Request Lagu
         </CardTitle>
         <CardDescription>
-          Kirimkan request lagu favorit Anda kepada penyiar Radio Gbika. 
+          Kirimkan request lagu favorit Anda kepada penyiar Radio El-Shaddai FM. 
           Lagu Anda mungkin akan diputar dalam siaran berikutnya!
         </CardDescription>
       </CardHeader>

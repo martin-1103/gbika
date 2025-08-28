@@ -11,6 +11,7 @@ interface FindAllParams {
   limit?: number;
   sortBy?: 'published_at' | 'createdAt';
   sortOrder?: 'asc' | 'desc';
+  admin?: boolean; // Include drafts and scheduled articles for admin
 }
 
 // Interface for findAll response
@@ -31,7 +32,8 @@ export const findAll = async (params: FindAllParams = {}): Promise<FindAllRespon
       page = 1,
       limit = 10,
       sortBy = 'published_at',
-      sortOrder = 'desc'
+      sortOrder = 'desc',
+      admin = false
     } = params;
 
     // Calculate offset for pagination
@@ -39,8 +41,12 @@ export const findAll = async (params: FindAllParams = {}): Promise<FindAllRespon
 
     // Build where clause
     const whereClause: any = {
-      status: 'published',
       deleted_at: null
+    }
+
+    // For non-admin users, only show published articles
+    if (!admin) {
+      whereClause.status = 'published'
     }
 
     // Get total count for pagination
@@ -90,7 +96,8 @@ interface CreateArticleData {
   title: string;
   content: string;
   slug?: string;
-  status?: 'draft' | 'published';
+  status?: 'draft' | 'published' | 'scheduled';
+  published_at?: string; // ISO string for scheduled posts
 }
 
 // Create new article with slug generation and HTML sanitization
@@ -100,7 +107,8 @@ export const createArticle = async (data: CreateArticleData) => {
       title,
       content,
       slug,
-      status = 'draft'
+      status = 'draft',
+      published_at
     } = data;
 
     // Validate required fields
@@ -133,13 +141,28 @@ export const createArticle = async (data: CreateArticleData) => {
     const sanitizedContent = sanitizeHtml(content);
 
     // Prepare article data
-    const articleData = {
+    const articleData: any = {
       title: title.trim(),
       content: sanitizedContent,
       slug: articleSlug,
-      status,
-      published_at: status === 'published' ? new Date() : null
+      status
     };
+
+    // Handle published_at based on status
+    if (status === 'published') {
+      articleData.published_at = new Date();
+    } else if (status === 'scheduled') {
+      if (!published_at) {
+        throw new Error('Published date is required for scheduled articles');
+      }
+      const scheduledDate = new Date(published_at);
+      if (scheduledDate <= new Date()) {
+        throw new Error('Scheduled date must be in the future');
+      }
+      articleData.published_at = scheduledDate;
+    } else {
+      articleData.published_at = null;
+    }
 
     // Create article
     const article = await prisma.article.create({
@@ -201,7 +224,7 @@ export const findLatest = async (limit: number = 3) => {
 };
 
 // Find one published article by slug
-export const findOneBySlug = async (slug: string) => {
+export const findOneBySlug = async (slug: string, admin: boolean = false) => {
   try {
     const article = await prisma.article.findUnique({
       where: {
@@ -220,8 +243,13 @@ export const findOneBySlug = async (slug: string) => {
       }
     });
 
-    // Return null if article doesn't exist, is not published, or is soft deleted
-    if (!article || article.status !== 'published' || article.deleted_at !== null) {
+    // Return null if article doesn't exist or is soft deleted
+    if (!article || article.deleted_at !== null) {
+      return null;
+    }
+
+    // For non-admin users, only return published articles
+    if (!admin && article.status !== 'published') {
       return null;
     }
 
@@ -273,7 +301,8 @@ interface UpdateArticleData {
   title?: string;
   content?: string;
   slug?: string;
-  status?: 'draft' | 'published';
+  status?: 'draft' | 'published' | 'scheduled';
+  published_at?: string; // ISO string for scheduled posts
 }
 
 // Update article by slug with proper validation
@@ -372,9 +401,30 @@ export const updateBySlug = async (currentSlug: string, data: UpdateArticleData)
       // Update published_at based on status change
       if (data.status === 'published' && existingArticle.status !== 'published') {
         updateData.published_at = new Date();
-      } else if (data.status === 'draft' && existingArticle.status === 'published') {
+      } else if (data.status === 'draft') {
         updateData.published_at = null;
+      } else if (data.status === 'scheduled') {
+        if (!data.published_at) {
+          throw new Error('Published date is required for scheduled articles');
+        }
+        const scheduledDate = new Date(data.published_at);
+        // For updates, allow existing scheduled dates even if they're in the past
+        // This allows editing existing scheduled articles without changing the date
+        if (scheduledDate <= new Date()) {
+          console.log(`Warning: Scheduled date ${data.published_at} is in the past, but allowing for update`);
+        }
+        updateData.published_at = scheduledDate;
       }
+    }
+
+    // Handle published_at update for scheduled posts
+    if (data.published_at !== undefined && data.status === 'scheduled') {
+      const scheduledDate = new Date(data.published_at);
+      // For updates, allow existing scheduled dates even if they're in the past
+      if (scheduledDate <= new Date()) {
+        console.log(`Warning: Scheduled date ${data.published_at} is in the past, but allowing for update`);
+      }
+      updateData.published_at = scheduledDate;
     }
 
     // Ensure at least one field is being updated
@@ -418,3 +468,66 @@ export const updateBySlug = async (currentSlug: string, data: UpdateArticleData)
     throw error;
    }
  };
+
+// Find scheduled articles that are ready to be published
+export const findScheduledArticlesReadyToPublish = async () => {
+  try {
+    const now = new Date();
+    
+    const articles = await prisma.article.findMany({
+      where: {
+        status: 'scheduled',
+        published_at: {
+          lte: now // published_at is less than or equal to now
+        },
+        deleted_at: null
+      },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        published_at: true
+      }
+    });
+    
+    return articles;
+  } catch (error) {
+    console.error('Error in findScheduledArticlesReadyToPublish:', error);
+    throw error;
+  }
+};
+
+// Publish a scheduled article by ID
+export const publishScheduledArticle = async (articleId: string) => {
+  try {
+    const updatedArticle = await prisma.article.update({
+      where: {
+        id: articleId,
+        status: 'scheduled', // Ensure it's still scheduled
+        deleted_at: null
+      },
+      data: {
+        status: 'published'
+        // Keep the original published_at date
+      },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        status: true,
+        published_at: true
+      }
+    });
+    
+    console.log(`Article published: ${updatedArticle.title} (${updatedArticle.id})`);
+    return updatedArticle;
+  } catch (error: any) {
+    console.error('Error in publishScheduledArticle:', error);
+    
+    if (error.code === 'P2025') {
+      throw new Error('Scheduled article not found or already published');
+    }
+    
+    throw error;
+  }
+};
