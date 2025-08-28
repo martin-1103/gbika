@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Save, Eye, FileText, Loader2, AlertCircle } from "lucide-react"
+import { apiClient, isAxiosError } from "@/lib/api/client"
 
 interface ArticleFormData {
   title: string
@@ -89,27 +90,11 @@ export function ArticleForm({
     setError(null)
 
     try {
-      const endpoint = mode === 'create' 
-        ? '/api/articles' 
-        : `/api/articles/${slug}`
-      
-      const method = mode === 'create' ? 'POST' : 'PUT'
-      
-      const response = await fetch(endpoint, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-        },
-        body: JSON.stringify(formData),
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || `Failed to ${mode} article`)
+      if (mode === 'create') {
+        await apiClient.post('/articles', formData)
+      } else {
+        await apiClient.put(`/articles/${slug}`, formData)
       }
-
-      const data = await response.json()
       
       // Call success callback or redirect
       if (onSuccess) {
@@ -117,8 +102,12 @@ export function ArticleForm({
       } else {
         router.push('/admin/articles')
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : `An error occurred while ${mode === 'create' ? 'creating' : 'updating'} the article`)
+    } catch (err: unknown) {
+      if (isAxiosError(err) && err.response?.data?.message) {
+        setError(err.response.data.message)
+      } else {
+        setError(`An error occurred while ${mode === 'create' ? 'creating' : 'updating'} the article`)
+      }
     } finally {
       setIsLoading(false)
     }

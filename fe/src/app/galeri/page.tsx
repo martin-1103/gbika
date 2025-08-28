@@ -9,7 +9,6 @@ import { Card, CardContent } from "@/components/ui/card"
 import { 
   Camera, 
   Search, 
-  Filter,
   Calendar,
   MapPin,
   Play,
@@ -308,7 +307,7 @@ export default function GaleriPage() {
               <Camera className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
               <h3 className="text-lg font-semibold mb-2">Tidak Ada Hasil</h3>
               <p className="text-muted-foreground mb-4">
-                Tidak ada foto atau video yang cocok dengan pencarian "{searchQuery}"
+                Tidak ada foto atau video yang cocok dengan pencarian &quot;{searchQuery}&quot;
               </p>
               <Button
                 variant="outline"

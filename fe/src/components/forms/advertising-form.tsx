@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { CheckCircle, AlertCircle, Loader2, Megaphone } from 'lucide-react'
+import { apiClient, isAxiosError, getErrorMessage } from '@/lib/api/client'
 
 // AdvertisingForm: Form for advertising placement requests
 interface FormData {
@@ -66,35 +67,7 @@ export function AdvertisingForm({ className }: AdvertisingFormProps) {
     setIsRateLimited(false)
 
     try {
-      const response = await fetch('/api/advertising/request', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      })
-
-      // Handle rate limiting
-      if (response.status === 429) {
-        setIsRateLimited(true)
-        return
-      }
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        if (errorData.errors && Array.isArray(errorData.errors)) {
-          const fieldErrors: FormErrors = {}
-          errorData.errors.forEach((error: any) => {
-            if (error.path) {
-              fieldErrors[error.path as keyof FormErrors] = error.msg
-            }
-          })
-          setErrors(fieldErrors)
-        } else {
-          setErrors({ general: errorData.message || "Terjadi kesalahan saat mengirim permintaan iklan" })
-        }
-        return
-      }
+      await apiClient.post('/advertising/request', formData)
 
       // Success
       setIsSuccess(true)
@@ -115,9 +88,27 @@ export function AdvertisingForm({ className }: AdvertisingFormProps) {
         setIsSuccess(false)
       }, 5000)
 
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error submitting advertising request:', error)
-      setErrors({ general: "Terjadi kesalahan jaringan. Silakan coba lagi." })
+      
+      // Handle rate limiting
+      if (isAxiosError(error) && error.response?.status === 429) {
+        setIsRateLimited(true)
+        return
+      }
+      
+      // Handle validation errors
+      if (isAxiosError(error) && error.response?.data?.errors && Array.isArray(error.response.data.errors)) {
+        const fieldErrors: FormErrors = {}
+        error.response.data.errors.forEach((err: { path: keyof FormErrors, msg: string }) => {
+          if (err.path) {
+            fieldErrors[err.path] = err.msg
+          }
+        })
+        setErrors(fieldErrors)
+      } else {
+        setErrors({ general: getErrorMessage(error, "Terjadi kesalahan saat mengirim permintaan iklan") })
+      }
     } finally {
       setIsSubmitting(false)
     }

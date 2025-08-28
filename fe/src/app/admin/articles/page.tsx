@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { formatDistanceToNow } from "date-fns"
 import { id } from "date-fns/locale"
+import { apiClient } from "@/lib/api/client"
 
 interface Article {
   id: string
@@ -82,25 +83,14 @@ export default function AdminArticlesPage() {
         params.append('search', search)
       }
       
-      const token = localStorage.getItem('auth_token')
-      const response = await fetch(`/api/articles?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
-      
-      if (!response.ok) {
-        throw new Error('Gagal memuat daftar artikel')
-      }
-      
-      const data = await response.json()
+      const response = await apiClient.get(`/articles?${params}`)
       
       setState(prev => ({
         ...prev,
-        articles: data.data || [],
+        articles: response.data.data || [],
         currentPage: page,
-        totalPages: data.meta?.totalPages || 1,
-        totalItems: data.meta?.total || 0,
+        totalPages: response.data.meta?.totalPages || 1,
+        totalItems: response.data.meta?.total || 0,
         searchQuery: search,
         isLoading: false
       }))
@@ -121,17 +111,7 @@ export default function AdminArticlesPage() {
     }
 
     try {
-      const token = localStorage.getItem('auth_token')
-      const response = await fetch(`/api/articles/${slug}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
-
-      if (!response.ok) {
-        throw new Error('Gagal menghapus artikel')
-      }
+      await apiClient.delete(`/articles/${slug}`)
 
       // Refresh articles list
       fetchArticles(state.currentPage, state.searchQuery)
@@ -164,8 +144,8 @@ export default function AdminArticlesPage() {
     {
       key: "title",
       title: "Judul",
-      dataIndex: "title",
-      render: (value: any, record: Article) => (
+      dataIndex: "title" as keyof Article,
+      render: (_: unknown, record: Article) => (
         <div className="max-w-[300px]">
           <p className="font-medium truncate">{record.title}</p>
           <p className="text-sm text-muted-foreground">/{record.slug}</p>
@@ -175,8 +155,8 @@ export default function AdminArticlesPage() {
     {
       key: "status",
       title: "Status",
-      dataIndex: "status",
-      render: (value: any, record: Article) => (
+      dataIndex: "status" as keyof Article,
+      render: (_: unknown, record: Article) => (
         <Badge variant={getStatusVariant(record.status)}>
           {record.status === 'published' ? 'Dipublikasi' : 'Draft'}
         </Badge>
@@ -185,8 +165,8 @@ export default function AdminArticlesPage() {
     {
       key: "published_at",
       title: "Tanggal Publikasi",
-      dataIndex: "published_at",
-      render: (value: any, record: Article) => {
+      dataIndex: "published_at" as keyof Article,
+      render: (_: unknown, record: Article) => {
         if (!record.published_at) {
           return <span className="text-muted-foreground">-</span>
         }
@@ -207,8 +187,8 @@ export default function AdminArticlesPage() {
     {
       key: "updatedAt",
       title: "Terakhir Diubah",
-      dataIndex: "updatedAt",
-      render: (value: any, record: Article) => {
+      dataIndex: "updatedAt" as keyof Article,
+      render: (_: unknown, record: Article) => {
         const date = new Date(record.updatedAt)
         return (
           <div>
@@ -225,7 +205,7 @@ export default function AdminArticlesPage() {
     {
       key: "actions",
       title: "Aksi",
-      render: (value: any, record: Article) => (
+      render: (_: unknown, record: Article) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-8 w-8 p-0">

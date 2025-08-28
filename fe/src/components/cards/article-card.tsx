@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Calendar, User, Clock } from "lucide-react"
@@ -74,11 +75,12 @@ export function ArticleCard({
     <Card className={cn(cardVariants[variant], className)}>
       {/* Article Image */}
       {showImage && article.image && (
-        <div className="aspect-video overflow-hidden rounded-t-lg">
-          <img 
+        <div className="aspect-video overflow-hidden rounded-t-lg relative">
+          <Image 
             src={article.image} 
             alt={article.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
           />
         </div>
       )}

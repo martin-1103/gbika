@@ -96,7 +96,7 @@ export function CallToAction({ className }: CallToActionProps) {
           <Card className="bg-primary text-primary-foreground">
             <CardContent className="p-8">
               <h3 className="text-2xl font-bold mb-4">
-                "Karena itu pergilah, jadikanlah semua bangsa murid-Ku..."
+                &quot;Karena itu pergilah, jadikanlah semua bangsa murid-Ku...&quot;
               </h3>
               <p className="text-primary-foreground/80 mb-6 text-lg">
                 Matius 28:19 - Mari bersama-sama menjadi bagian dari Amanat Agung

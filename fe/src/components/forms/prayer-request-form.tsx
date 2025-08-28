@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2, Heart, CheckCircle, AlertCircle } from "lucide-react"
+import { apiClient, isAxiosError, getErrorMessage } from "@/lib/api/client"
 
 interface PrayerRequestFormProps {
   className?: string
@@ -83,35 +84,7 @@ export function PrayerRequestForm({ className }: PrayerRequestFormProps) {
     setIsRateLimited(false)
 
     try {
-      const response = await fetch('/api/services/prayer', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      })
-
-      if (response.status === 429) {
-        setIsRateLimited(true)
-        setErrors({ general: "Anda telah mencapai batas pengiriman. Silakan coba lagi nanti." })
-        return
-      }
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        if (errorData.errors && Array.isArray(errorData.errors)) {
-          const fieldErrors: FormErrors = {}
-          errorData.errors.forEach((error: any) => {
-            if (error.path) {
-              fieldErrors[error.path as keyof FormErrors] = error.msg
-            }
-          })
-          setErrors(fieldErrors)
-        } else {
-          setErrors({ general: errorData.message || "Terjadi kesalahan saat mengirim permohonan doa" })
-        }
-        return
-      }
+      await apiClient.post('/services/prayer', formData)
 
       // Success
       setIsSuccess(true)
@@ -127,9 +100,26 @@ export function PrayerRequestForm({ className }: PrayerRequestFormProps) {
         setIsSuccess(false)
       }, 5000)
 
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error submitting prayer request:', error)
-      setErrors({ general: "Terjadi kesalahan jaringan. Silakan coba lagi." })
+      
+      if (isAxiosError(error) && error.response?.status === 429) {
+        setIsRateLimited(true)
+        setErrors({ general: "Anda telah mencapai batas pengiriman. Silakan coba lagi nanti." })
+        return
+      }
+      
+      if (isAxiosError(error) && error.response?.data?.errors && Array.isArray(error.response.data.errors)) {
+        const fieldErrors: FormErrors = {}
+        error.response.data.errors.forEach((err: { path: keyof FormErrors, msg: string }) => {
+          if (err.path) {
+            fieldErrors[err.path] = err.msg
+          }
+        })
+        setErrors(fieldErrors)
+      } else {
+        setErrors({ general: getErrorMessage(error, "Terjadi kesalahan saat mengirim permohonan doa") })
+      }
     } finally {
       setIsSubmitting(false)
     }

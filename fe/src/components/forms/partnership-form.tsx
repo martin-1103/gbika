@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { CheckCircle, AlertCircle, Loader2, Users } from 'lucide-react'
+import { apiClient, isAxiosError } from '@/lib/api/client'
 
 // PartnershipForm: Registration form for partnership program
 interface FormData {
@@ -50,35 +51,7 @@ export function PartnershipForm({ className }: PartnershipFormProps) {
     setIsRateLimited(false)
 
     try {
-      const response = await fetch('/api/membership/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      })
-
-      // Handle rate limiting
-      if (response.status === 429) {
-        setIsRateLimited(true)
-        return
-      }
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        if (errorData.errors && Array.isArray(errorData.errors)) {
-          const fieldErrors: FormErrors = {}
-          errorData.errors.forEach((error: any) => {
-            if (error.path) {
-              fieldErrors[error.path as keyof FormErrors] = error.msg
-            }
-          })
-          setErrors(fieldErrors)
-        } else {
-          setErrors({ general: errorData.message || "Terjadi kesalahan saat mendaftar sebagai partner" })
-        }
-        return
-      }
+      await apiClient.post('/membership/register', formData)
 
       // Success
       setIsSuccess(true)
@@ -94,9 +67,27 @@ export function PartnershipForm({ className }: PartnershipFormProps) {
         setIsSuccess(false)
       }, 5000)
 
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error submitting partnership registration:', error)
-      setErrors({ general: "Terjadi kesalahan jaringan. Silakan coba lagi." })
+      
+      // Handle rate limiting
+      if (isAxiosError(error) && error.response?.status === 429) {
+        setIsRateLimited(true)
+        return
+      }
+
+      const errorData = isAxiosError(error) ? error.response?.data : null
+      if (errorData?.errors && Array.isArray(errorData.errors)) {
+        const fieldErrors: FormErrors = {}
+        errorData.errors.forEach((err: { path: keyof FormErrors, msg: string }) => {
+          if (err.path) {
+            fieldErrors[err.path] = err.msg
+          }
+        })
+        setErrors(fieldErrors)
+      } else {
+        setErrors({ general: errorData?.message || (error instanceof Error ? error.message : "Terjadi kesalahan saat mendaftar sebagai partner") })
+      }
     } finally {
       setIsSubmitting(false)
     }

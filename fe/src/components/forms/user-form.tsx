@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
+import { apiClient, getErrorMessage } from "@/lib/api/client"
 import { Save, User, Loader2, AlertCircle, CheckCircle, Eye, EyeOff } from "lucide-react"
 
 interface UserFormData {
@@ -17,7 +18,7 @@ interface UserFormData {
   password?: string
   role: "admin" | "editor" | "broadcaster"
   isActive: boolean
-  permissions?: {
+  permissions: {
     articles: boolean
     testimonials: boolean
     schedules: boolean
@@ -92,12 +93,38 @@ export function UserForm({
     livechat: "Moderasi Live Chat"
   }
 
+  const loadUser = useCallback(async () => {
+    try {
+      setIsLoadingData(true)
+      const data = await apiClient.get(`/api/users/${userId}`)
+      
+      setFormData({
+        name: data.data?.name || "",
+        email: data.data?.email || "",
+        password: "", // Never pre-fill password
+        role: data.data?.role || "editor",
+        isActive: data.data?.isActive ?? true,
+        permissions: data.data?.permissions || {
+          articles: false,
+          testimonials: false,
+          schedules: false,
+          users: false,
+          livechat: false
+        }
+      })
+    } catch (error: unknown) {
+      setError(getErrorMessage(error, 'Gagal memuat data user'))
+    } finally {
+      setIsLoadingData(false)
+    }
+  }, [userId])
+
   // Load user data if in edit mode
   useEffect(() => {
     if (userId && mode === "edit" && !initialData) {
       loadUser()
     }
-  }, [userId, mode])
+  }, [userId, mode, initialData, loadUser])
 
   // Auto-set permissions based on role
   useEffect(() => {
@@ -130,42 +157,6 @@ export function UserForm({
       permissions: rolePermissions[formData.role]
     }))
   }, [formData.role])
-
-  const loadUser = async () => {
-    try {
-      setIsLoadingData(true)
-      const token = localStorage.getItem('auth_token')
-      const response = await fetch(`/api/users/${userId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
-
-      if (!response.ok) {
-        throw new Error('Gagal memuat data user')
-      }
-
-      const data = await response.json()
-      setFormData({
-        name: data.name || "",
-        email: data.email || "",
-        password: "", // Never pre-fill password
-        role: data.role || "editor",
-        isActive: data.isActive ?? true,
-        permissions: data.permissions || {
-          articles: false,
-          testimonials: false,
-          schedules: false,
-          users: false,
-          livechat: false
-        }
-      })
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Terjadi kesalahan')
-    } finally {
-      setIsLoadingData(false)
-    }
-  }
 
   // Handle form input changes
   const handleInputChange = (field: keyof UserFormData, value: string | boolean) => {
@@ -215,31 +206,16 @@ export function UserForm({
     setSuccess(false)
 
     try {
-      const token = localStorage.getItem('auth_token')
-      const endpoint = mode === 'create' 
-        ? '/api/users' 
-        : `/api/users/${userId}`
-      
-      const method = mode === 'create' ? 'POST' : 'PUT'
-      
       // Prepare payload (exclude empty password for edit mode)
       const payload = { ...formData }
       if (mode === 'edit' && !payload.password) {
         delete payload.password
       }
       
-      const response = await fetch(endpoint, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(payload)
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || `Gagal ${mode === 'create' ? 'membuat' : 'memperbarui'} user`)
+      if (mode === 'create') {
+        await apiClient.post('/users', payload)
+      } else {
+        await apiClient.put(`/users/${userId}`, payload)
       }
 
       setSuccess(true)
@@ -264,8 +240,8 @@ export function UserForm({
         })
       }
 
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Terjadi kesalahan')
+    } catch (error: unknown) {
+      setError(getErrorMessage(error, `Gagal ${mode === 'create' ? 'membuat' : 'memperbarui'} user`))
     } finally {
       setIsLoading(false)
     }

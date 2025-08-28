@@ -1,15 +1,15 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Save, Eye, FileText, Loader2, AlertCircle, CheckCircle } from "lucide-react"
+import { apiClient, getErrorMessage } from "@/lib/api/client"
 
 interface StaticPageFormData {
   title: string
@@ -49,41 +49,30 @@ export function StaticPageForm({
   const [success, setSuccess] = useState(false)
   const [isAutoGeneratingSlug, setIsAutoGeneratingSlug] = useState(mode === "create")
 
+  const loadStaticPage = useCallback(async () => {
+    try {
+      setIsLoadingData(true)
+      const data = await apiClient.get(`/pages/${pageId}`)
+      setFormData({
+        title: data.data?.title || "",
+        slug: data.data?.slug || "",
+        content: data.data?.content || "",
+        metaDescription: data.data?.metaDescription || "",
+        status: data.data?.status || "draft"
+      })
+    } catch (error: unknown) {
+      setError(getErrorMessage(error, 'Terjadi kesalahan'))
+    } finally {
+      setIsLoadingData(false)
+    }
+  }, [pageId])
+
   // Load page data if in edit mode
   useEffect(() => {
     if (pageId && mode === "edit" && !initialData) {
       loadStaticPage()
     }
-  }, [pageId, mode])
-
-  const loadStaticPage = async () => {
-    try {
-      setIsLoadingData(true)
-      const token = localStorage.getItem('auth_token')
-      const response = await fetch(`/api/pages/${pageId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
-
-      if (!response.ok) {
-        throw new Error('Gagal memuat data halaman')
-      }
-
-      const data = await response.json()
-      setFormData({
-        title: data.title || "",
-        slug: data.slug || "",
-        content: data.content || "",
-        metaDescription: data.metaDescription || "",
-        status: data.status || "draft"
-      })
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Terjadi kesalahan')
-    } finally {
-      setIsLoadingData(false)
-    }
-  }
+  }, [pageId, mode, initialData, loadStaticPage])
 
   // Auto-generate slug from title
   const generateSlug = (title: string): string => {
@@ -131,25 +120,10 @@ export function StaticPageForm({
     setSuccess(false)
 
     try {
-      const token = localStorage.getItem('auth_token')
-      const endpoint = mode === 'create' 
-        ? '/api/pages' 
-        : `/api/pages/${pageId}`
-      
-      const method = mode === 'create' ? 'POST' : 'PUT'
-      
-      const response = await fetch(endpoint, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(formData)
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || `Gagal ${mode === 'create' ? 'membuat' : 'memperbarui'} halaman`)
+      if (mode === 'create') {
+        await apiClient.post('/pages', formData)
+      } else {
+        await apiClient.put(`/pages/${pageId}`, formData)
       }
 
       setSuccess(true)
@@ -168,8 +142,8 @@ export function StaticPageForm({
         setIsAutoGeneratingSlug(true)
       }
 
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Terjadi kesalahan')
+    } catch (error: unknown) {
+      setError(getErrorMessage(error, 'Terjadi kesalahan'))
     } finally {
       setIsLoading(false)
     }

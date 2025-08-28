@@ -1,6 +1,6 @@
 interface WebSocketMessage {
   event: string;
-  payload: any;
+  payload: unknown;
 }
 
 interface WebSocketClientOptions {
@@ -73,7 +73,7 @@ class WebSocketClient {
     }
   }
 
-  sendMessage(event: string, payload: any): void {
+  sendMessage(event: string, payload: unknown): void {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       const message: WebSocketMessage = { event, payload };
       this.ws.send(JSON.stringify(message));

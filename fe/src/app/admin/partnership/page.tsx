@@ -1,7 +1,7 @@
 "use client"
 
 import { AdminLayout } from "@/components/layout"
-import { DataTable } from "@/components/ui"
+import { DataTable, DataTableColumn } from "@/components/ui/data-table"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -17,10 +17,20 @@ import {
 import { formatDistanceToNow } from "date-fns"
 import { id } from "date-fns/locale"
 
+interface Partnership {
+  id: string;
+  name: string;
+  email: string;
+  partnerType: "sponsor" | "content-creator" | "event-organizer" | "ministry" | "business" | "other";
+  status: "pending" | "approved" | "rejected";
+  createdAt: string;
+  whatsapp: string;
+}
+
 // Admin Partnership Management page
 export default function AdminPartnershipPage() {
   // Mock data
-  const partnerships = [
+  const partnerships: Partnership[] = [
     {
       id: "1",
       name: "John Doe",
@@ -32,8 +42,8 @@ export default function AdminPartnershipPage() {
     }
   ]
 
-  const getTypeLabel = (type: string) => {
-    const types: Record<string, string> = {
+  const getTypeLabel = (type: Partnership['partnerType']) => {
+    const types: Record<Partnership['partnerType'], string> = {
       sponsor: "Sponsor",
       "content-creator": "Content Creator",
       "event-organizer": "Event Organizer",
@@ -44,7 +54,7 @@ export default function AdminPartnershipPage() {
     return types[type] || type
   }
 
-  const getStatusVariant = (status: string) => {
+  const getStatusVariant = (status: Partnership['status']) => {
     switch (status) {
       case 'approved': return 'default'
       case 'rejected': return 'destructive'
@@ -52,7 +62,7 @@ export default function AdminPartnershipPage() {
     }
   }
 
-  const getStatusLabel = (status: string) => {
+  const getStatusLabel = (status: Partnership['status']) => {
     switch (status) {
       case 'approved': return 'Disetujui'
       case 'rejected': return 'Ditolak'
@@ -60,41 +70,41 @@ export default function AdminPartnershipPage() {
     }
   }
 
-  const columns = [
+  const columns: DataTableColumn<Partnership>[] = [
     {
-      accessorKey: "name",
-      header: "Nama & Kontak",
-      cell: ({ row }: any) => (
+      key: "name",
+      title: "Nama & Kontak",
+      render: (_, record) => (
         <div>
-          <p className="font-medium">{row.original.name}</p>
-          <p className="text-sm text-muted-foreground">{row.original.email}</p>
-          <p className="text-sm text-muted-foreground">{row.original.whatsapp}</p>
+          <p className="font-medium">{record.name}</p>
+          <p className="text-sm text-muted-foreground">{record.email}</p>
+          <p className="text-sm text-muted-foreground">{record.whatsapp}</p>
         </div>
       )
     },
     {
-      accessorKey: "partnerType",
-      header: "Jenis Kemitraan",
-      cell: ({ row }: any) => (
+      key: "partnerType",
+      title: "Jenis Kemitraan",
+      render: (_, record) => (
         <Badge variant="outline">
-          {getTypeLabel(row.original.partnerType)}
+          {getTypeLabel(record.partnerType)}
         </Badge>
       )
     },
     {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }: any) => (
-        <Badge variant={getStatusVariant(row.original.status)}>
-          {getStatusLabel(row.original.status)}
+      key: "status",
+      title: "Status",
+      render: (_, record) => (
+        <Badge variant={getStatusVariant(record.status)}>
+          {getStatusLabel(record.status)}
         </Badge>
       )
     },
     {
-      accessorKey: "createdAt",
-      header: "Tanggal Daftar",
-      cell: ({ row }: any) => {
-        const date = new Date(row.original.createdAt)
+      key: "createdAt",
+      title: "Tanggal Daftar",
+      render: (_, record) => {
+        const date = new Date(record.createdAt)
         return (
           <div>
             <p className="text-sm">
@@ -108,9 +118,9 @@ export default function AdminPartnershipPage() {
       }
     },
     {
-      id: "actions",
-      header: "Aksi",
-      cell: ({ row }: any) => (
+      key: "actions",
+      title: "Aksi",
+      render: (_, record) => (
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="sm">
             <Eye className="h-4 w-4" />
@@ -118,7 +128,7 @@ export default function AdminPartnershipPage() {
           <Button variant="ghost" size="sm">
             <Mail className="h-4 w-4" />
           </Button>
-          {row.original.status === 'pending' && (
+          {record.status === 'pending' && (
             <>
               <Button variant="ghost" size="sm" className="text-green-600">
                 <Check className="h-4 w-4" />

@@ -244,8 +244,8 @@ export default function SubmitTestimonialPage() {
             <MessageSquare className="h-12 w-12 mx-auto mb-4 text-primary" />
             <h3 className="text-2xl font-semibold mb-2">Kuasa Kesaksian</h3>
             <p className="text-muted-foreground mb-4">
-              "Dan mereka mengalahkan dia oleh darah Anak Domba dan oleh perkataan kesaksian mereka, 
-              dan mereka tidak mengasihi nyawa mereka sampai ke dalam maut." - Wahyu 12:11
+              &quot;Dan mereka mengalahkan dia oleh darah Anak Domba dan oleh perkataan kesaksian mereka, 
+              dan mereka tidak mengasihi nyawa mereka sampai ke dalam maut.&quot; - Wahyu 12:11
             </p>
             <p className="text-sm text-muted-foreground">
               Setiap kesaksian adalah senjata rohani yang dapat mengalahkan kegelapan dan 

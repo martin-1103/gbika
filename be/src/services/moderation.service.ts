@@ -117,6 +117,9 @@ const moderateMessage = async (
       }
     }) as MessageWithSession;
 
+    // Publish moderation event to admin channel
+    await publishMessageModerated(updatedMessage, action);
+
     // If approved, publish to Redis for WebSocket broadcast
     if (action === 'approve') {
       await publishMessageApproved(updatedMessage);
@@ -130,6 +133,34 @@ const moderateMessage = async (
     return updatedMessage;
   } catch (error) {
     console.error('Error in moderateMessage:', error);
+    throw error;
+  }
+};
+
+// Publish moderation event to admin channel
+const publishMessageModerated = async (message: MessageWithSession, action: ModerationAction): Promise<void> => {
+  try {
+    const moderationEvent = {
+      event: 'message:moderated',
+      data: {
+        messageId: message.id,
+        sessionId: message.sessionId,
+        text: message.text,
+        sender: 'user',
+        status: message.status,
+        createdAt: message.createdAt.toISOString(),
+        updatedAt: message.moderatedAt?.toISOString() || new Date().toISOString(),
+        guestName: message.session.guestUser.name,
+        guestCity: message.session.guestUser.city,
+        action: action
+      }
+    };
+
+    // Publish to livechat:admin channel for moderator dashboard
+    await redisClient.publish('livechat:admin', JSON.stringify(moderationEvent));
+    console.log(`Published moderation event to livechat:admin channel: ${action} for message ${message.id}`);
+  } catch (error) {
+    console.error('Error publishing moderation event:', error);
     throw error;
   }
 };
@@ -228,5 +259,6 @@ export {
   getPendingMessages,
   getMessageById,
   publishMessageApproved,
+  publishMessageModerated,
   blockUserSession
 };

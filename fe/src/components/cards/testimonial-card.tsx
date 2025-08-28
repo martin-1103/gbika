@@ -74,7 +74,7 @@ export function TestimonialCard({
           "text-muted-foreground mb-4 italic",
           isCompact ? "line-clamp-3 text-sm" : "line-clamp-4"
         )}>
-          "{testimonial.content}"
+          &quot;{testimonial.content}&quot;
         </blockquote>
         
         <div className="flex items-center gap-2 text-sm">

@@ -305,8 +305,8 @@ export default function PartnershipPage() {
             <Handshake className="h-12 w-12 mx-auto mb-4 text-primary" />
             <h3 className="text-2xl font-semibold mb-2">Bersama Membangun Kerajaan</h3>
             <p className="text-muted-foreground mb-4">
-              "Karena sama seperti tubuh itu satu dan anggotanya banyak, dan segala anggota itu, 
-              sekalipun banyak, merupakan satu tubuh, demikian pula Kristus." - 1 Korintus 12:12
+              &quot;Karena sama seperti tubuh itu satu dan anggotanya banyak, dan segala anggota itu, 
+              sekalipun banyak, merupakan satu tubuh, demikian pula Kristus.&quot; - 1 Korintus 12:12
             </p>
             <p className="text-sm text-muted-foreground">
               Melalui partnership yang solid, kita dapat mencapai lebih banyak jiwa dan 

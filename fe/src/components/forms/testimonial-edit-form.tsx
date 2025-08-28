@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Save, ArrowLeft, MessageSquare, Loader2, AlertCircle, CheckCircle } from "lucide-react"
+import { apiClient } from "@/lib/api/client"
 
 interface TestimonialFormData {
   title: string
@@ -47,28 +48,12 @@ export function TestimonialEditForm({
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
 
-  // Load testimonial data if ID provided
-  useEffect(() => {
-    if (testimonialId && !initialData) {
-      loadTestimonial()
-    }
-  }, [testimonialId])
-
-  const loadTestimonial = async () => {
+  const loadTestimonial = useCallback(async () => {
     try {
       setIsLoadingData(true)
-      const token = localStorage.getItem('auth_token')
-      const response = await fetch(`/api/testimonials/${testimonialId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
-
-      if (!response.ok) {
-        throw new Error('Gagal memuat data kesaksian')
-      }
-
-      const data = await response.json()
+      const response = await apiClient.get(`/testimonials/${testimonialId}`)
+      const data = response.data
+      
       setFormData({
         title: data.title || "",
         name: data.name || "",
@@ -82,7 +67,14 @@ export function TestimonialEditForm({
     } finally {
       setIsLoadingData(false)
     }
-  }
+  }, [testimonialId])
+
+  // Load testimonial data if ID provided
+  useEffect(() => {
+    if (testimonialId && !initialData) {
+      loadTestimonial()
+    }
+  }, [testimonialId, initialData, loadTestimonial])
 
   // Handle form input changes
   const handleInputChange = (field: keyof TestimonialFormData, value: string) => {
@@ -104,20 +96,7 @@ export function TestimonialEditForm({
     setSuccess(false)
 
     try {
-      const token = localStorage.getItem('auth_token')
-      const response = await fetch(`/api/testimonials/${testimonialId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(formData)
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || 'Gagal menyimpan perubahan kesaksian')
-      }
+      await apiClient.put(`/testimonials/${testimonialId}`, formData)
 
       setSuccess(true)
       if (onSuccess) {

@@ -1,14 +1,11 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { TestimonialCard } from "@/components/cards"
-import { Heart, Quote, User } from "lucide-react"
+import { Heart } from "lucide-react"
 import Link from "next/link"
-import { formatDistanceToNow } from "date-fns"
-import { id } from "date-fns/locale"
 
 interface Testimonial {
   id: string
@@ -85,18 +82,6 @@ export function LatestTestimonials({ className }: LatestTestimonialsProps) {
 
     fetchTestimonials()
   }, [])
-
-  // Format relative time
-  const formatRelativeTime = (dateString: string) => {
-    try {
-      return formatDistanceToNow(new Date(dateString), { 
-        addSuffix: true, 
-        locale: id 
-      })
-    } catch {
-      return "Baru saja"
-    }
-  }
 
   if (loading) {
     return (

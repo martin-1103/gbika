@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { PublicLayout } from "@/components/layout"
@@ -24,6 +24,7 @@ import {
 } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { id } from "date-fns/locale"
+import { apiClient, isAxiosError } from "@/lib/api/client"
 
 interface Article {
   id: string
@@ -56,60 +57,47 @@ export default function RenunganDetailPage() {
     isLoadingRelated: true
   })
 
-  // Fetch article by slug
-  const fetchArticle = async (articleSlug: string) => {
+  // Fetch related articles
+  const fetchRelatedArticles = useCallback(async () => {
     try {
-      setState(prev => ({ ...prev, isLoading: true, error: null }))
-      
-      const response = await fetch(`/api/articles/${articleSlug}`)
-      
-      if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error('Renungan tidak ditemukan')
-        }
-        throw new Error('Gagal memuat renungan')
-      }
-      
-      const article = await response.json()
+      const data = await apiClient.get('/articles?limit=4&sort_by=published_at&sort_order=desc')
       
       setState(prev => ({
         ...prev,
-        article,
+        relatedArticles: (data.data || []).filter((article: Article) => article.slug !== slug).slice(0, 3),
+        isLoadingRelated: false
+      }))
+    } catch {
+      setState(prev => ({ ...prev, isLoadingRelated: false }))
+    }
+  }, [slug])
+
+  // Fetch article by slug
+  const fetchArticle = useCallback(async (articleSlug: string) => {
+    try {
+      setState(prev => ({ ...prev, isLoading: true, error: null }))
+      
+      const article = await apiClient.get(`/api/articles/${articleSlug}`)
+      
+      setState(prev => ({
+        ...prev,
+        article: article.data,
         isLoading: false,
         error: null
       }))
       
       // Load related articles
       fetchRelatedArticles()
-    } catch (error) {
+    } catch (error: unknown) {
       setState(prev => ({
         ...prev,
         article: null,
         isLoading: false,
-        error: error instanceof Error ? error.message : 'Terjadi kesalahan'
+        error: isAxiosError(error) && error.response?.status === 404 ? 'Renungan tidak ditemukan' : 
+               isAxiosError(error) ? error.response?.data?.message : 'Gagal memuat renungan'
       }))
     }
-  }
-
-  // Fetch related articles
-  const fetchRelatedArticles = async () => {
-    try {
-      const response = await fetch('/api/articles?limit=4&sort_by=published_at&sort_order=desc')
-      
-      if (response.ok) {
-        const data = await response.json()
-        setState(prev => ({
-          ...prev,
-          relatedArticles: (data.data || []).filter((article: Article) => article.slug !== slug).slice(0, 3),
-          isLoadingRelated: false
-        }))
-      } else {
-        setState(prev => ({ ...prev, isLoadingRelated: false }))
-      }
-    } catch {
-      setState(prev => ({ ...prev, isLoadingRelated: false }))
-    }
-  }
+  }, [fetchRelatedArticles])
 
   // Share article
   const shareArticle = async () => {
@@ -123,7 +111,7 @@ export default function RenunganDetailPage() {
           url,
           text: `Baca renungan: ${title}`
         })
-      } catch (err) {
+      } catch {
         // User cancelled sharing
       }
     } else {
@@ -131,7 +119,7 @@ export default function RenunganDetailPage() {
       try {
         await navigator.clipboard.writeText(url)
         // Could show a toast notification here
-      } catch (err) {
+      } catch {
         // Fallback failed
       }
     }
@@ -173,7 +161,7 @@ export default function RenunganDetailPage() {
     if (slug) {
       fetchArticle(slug)
     }
-  }, [slug])
+  }, [slug, fetchArticle])
 
   // Loading skeleton
   const ContentSkeleton = () => (

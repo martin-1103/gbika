@@ -277,8 +277,8 @@ export default function PasangIklanPage() {
                   </div>
                 </div>
                 <p className="text-muted-foreground italic">
-                  "Iklan di Radio Gbika sangat efektif untuk menjangkau target market kami. 
-                  Tim professional dan hasil yang memuaskan!"
+                  &quot;Iklan di Radio Gbika sangat efektif untuk menjangkau target market kami. 
+                  Tim professional dan hasil yang memuaskan!&quot;
                 </p>
               </CardContent>
             </Card>
@@ -295,8 +295,8 @@ export default function PasangIklanPage() {
                   </div>
                 </div>
                 <p className="text-muted-foreground italic">
-                  "Setelah iklan di Radio Gbika, penjualan meningkat 40%. Audiensnya 
-                  sangat tepat dengan target pasar kami."
+                  &quot;Setelah iklan di Radio Gbika, penjualan meningkat 40%. Audiensnya 
+                  sangat tepat dengan target pasar kami.&quot;
                 </p>
               </CardContent>
             </Card>

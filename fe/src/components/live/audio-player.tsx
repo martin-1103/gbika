@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Slider } from "@/components/ui/slider"
-import { Play, Pause, Volume2, VolumeX, Radio, Loader2, RefreshCw } from "lucide-react"
+import { Play, Pause, Volume2, VolumeX, Radio, Loader2 } from "lucide-react"
 
 interface AudioPlayerProps {
   streamUrl?: string
@@ -161,7 +161,7 @@ export function AudioPlayer({
       audio.removeEventListener('waiting', handleWaiting)
       audio.removeEventListener('playing', handlePlaying)
     }
-  }, [actualStreamUrl, playerState.volume])
+  }, [actualStreamUrl, playerState.volume, currentUrlIndex])
 
   // Handle autoplay attempt when component mounts
   useEffect(() => {
@@ -180,23 +180,25 @@ export function AudioPlayer({
           console.log('Autoplay started successfully')
           setPlayerState(prev => ({ ...prev, autoplayBlocked: false }))
         }
-      } catch (error: any) {
-        console.log('Autoplay blocked by browser:', error.name)
-        
-        let errorMessage = "Klik tombol play untuk memulai streaming radio."
-        
-        if (error.name === 'NotAllowedError') {
-          errorMessage = "Browser memblokir autoplay. Klik tombol play untuk memulai streaming."
-          setPlayerState(prev => ({ ...prev, autoplayBlocked: true }))
-        } else if (error.name === 'NotSupportedError') {
-          errorMessage = "Browser tidak mendukung format audio ini. Coba gunakan browser lain."
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          console.log('Autoplay blocked by browser:', error.name)
+          
+          let errorMessage = "Klik tombol play untuk memulai streaming radio."
+          
+          if (error.name === 'NotAllowedError') {
+            errorMessage = "Browser memblokir autoplay. Klik tombol play untuk memulai streaming."
+            setPlayerState(prev => ({ ...prev, autoplayBlocked: true }))
+          } else if (error.name === 'NotSupportedError') {
+            errorMessage = "Browser tidak mendukung format audio ini. Coba gunakan browser lain."
+          }
+          
+          // Autoplay was blocked, user will need to click play button
+          setPlayerState(prev => ({ 
+            ...prev, 
+            error: errorMessage
+          }))
         }
-        
-        // Autoplay was blocked, user will need to click play button
-        setPlayerState(prev => ({ 
-          ...prev, 
-          error: errorMessage
-        }))
       }
     }
 
@@ -226,23 +228,25 @@ export function AudioPlayer({
           await playPromise
         }
       }
-    } catch (error: any) {
-      console.error('Playback error:', error)
-      let errorMessage = "Gagal memutar audio. Periksa koneksi internet Anda."
-      
-      if (error.name === 'NotAllowedError') {
-        errorMessage = "Browser memblokir autoplay. Silakan klik tombol play untuk memulai."
-      } else if (error.name === 'NotSupportedError') {
-        errorMessage = "Format audio tidak didukung oleh browser Anda."
-      } else if (error.name === 'AbortError') {
-        errorMessage = "Pemutaran dibatalkan. Silakan coba lagi."
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error('Playback error:', error)
+        let errorMessage = "Gagal memutar audio. Periksa koneksi internet Anda."
+        
+        if (error.name === 'NotAllowedError') {
+          errorMessage = "Browser memblokir autoplay. Silakan klik tombol play untuk memulai."
+        } else if (error.name === 'NotSupportedError') {
+          errorMessage = "Format audio tidak didukung oleh browser Anda."
+        } else if (error.name === 'AbortError') {
+          errorMessage = "Pemutaran dibatalkan. Silakan coba lagi."
+        }
+        
+        setPlayerState(prev => ({ 
+          ...prev, 
+          isLoading: false,
+          error: errorMessage
+        }))
       }
-      
-      setPlayerState(prev => ({ 
-        ...prev, 
-        isLoading: false,
-        error: errorMessage
-      }))
     }
   }
 
@@ -267,19 +271,6 @@ export function AudioPlayer({
     } else {
       audio.volume = 0
       setPlayerState(prev => ({ ...prev, isMuted: true }))
-    }
-  }
-
-  // Enable autoplay after user interaction
-  const enableAutoplay = async () => {
-    const audio = audioRef.current
-    if (!audio) return
-
-    try {
-      setPlayerState(prev => ({ ...prev, error: null, autoplayBlocked: false }))
-      await togglePlayback()
-    } catch (error) {
-      console.error('Failed to enable autoplay:', error)
     }
   }
 

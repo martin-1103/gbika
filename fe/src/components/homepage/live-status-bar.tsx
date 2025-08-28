@@ -1,11 +1,12 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Radio, Play, Heart, MessageCircle } from "lucide-react"
 import Link from "next/link"
+import { apiClient } from "@/lib/api/client"
 
 interface ScheduleItem {
   time: string
@@ -51,17 +52,13 @@ export function LiveStatusBar() {
   }
 
   // Fetch today's schedule and determine live status
-  const fetchLiveStatus = async () => {
+  const fetchLiveStatus = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
       
-      const response = await fetch('/api/pages/homepage')
-      if (!response.ok) {
-        throw new Error('Failed to fetch schedule')
-      }
-      
-      const data = await response.json()
+      const response = await apiClient.get('/pages/homepage')
+      const data = response.data
       if (data.success && data.data.today_schedule) {
         const { isLive, currentProgram } = isCurrentlyLive(data.data.today_schedule)
         
@@ -84,7 +81,7 @@ export function LiveStatusBar() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   // Fetch live status on mount and set up polling
   useEffect(() => {
@@ -94,7 +91,7 @@ export function LiveStatusBar() {
     const interval = setInterval(fetchLiveStatus, 120000)
     
     return () => clearInterval(interval)
-  }, [])
+  }, [fetchLiveStatus])
 
   if (loading) {
     return (

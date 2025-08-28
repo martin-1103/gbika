@@ -1,7 +1,7 @@
 "use client"
 
 import { AdminLayout } from "@/components/layout"
-import { DataTable } from "@/components/ui"
+import { DataTable, DataTableColumn } from "@/components/ui/data-table"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -16,10 +16,19 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: "admin" | "editor" | "broadcaster";
+  isActive: boolean;
+  lastLogin: string;
+}
+
 // Admin Users Management page
 export default function AdminUsersPage() {
   // Mock data
-  const users = [
+  const users: User[] = [
     {
       id: "1",
       name: "Admin User",
@@ -30,7 +39,7 @@ export default function AdminUsersPage() {
     }
   ]
 
-  const getRoleVariant = (role: string) => {
+  const getRoleVariant = (role: User['role']) => {
     switch (role) {
       case 'admin': return 'destructive'
       case 'editor': return 'default'
@@ -39,7 +48,7 @@ export default function AdminUsersPage() {
     }
   }
 
-  const getRoleLabel = (role: string) => {
+  const getRoleLabel = (role: User['role']) => {
     switch (role) {
       case 'admin': return 'Administrator'
       case 'editor': return 'Editor'
@@ -48,51 +57,51 @@ export default function AdminUsersPage() {
     }
   }
 
-  const columns = [
+  const columns: DataTableColumn<User>[] = [
     {
-      accessorKey: "name",
-      header: "Nama & Email",
-      cell: ({ row }: any) => (
+      key: "name",
+      title: "Nama & Email",
+      render: (_, record) => (
         <div>
-          <p className="font-medium">{row.original.name}</p>
-          <p className="text-sm text-muted-foreground">{row.original.email}</p>
+          <p className="font-medium">{record.name}</p>
+          <p className="text-sm text-muted-foreground">{record.email}</p>
         </div>
       )
     },
     {
-      accessorKey: "role",
-      header: "Role",
-      cell: ({ row }: any) => (
-        <Badge variant={getRoleVariant(row.original.role)}>
-          {getRoleLabel(row.original.role)}
+      key: "role",
+      title: "Role",
+      render: (_, record) => (
+        <Badge variant={getRoleVariant(record.role)}>
+          {getRoleLabel(record.role)}
         </Badge>
       )
     },
     {
-      accessorKey: "isActive",
-      header: "Status",
-      cell: ({ row }: any) => (
-        <Badge variant={row.original.isActive ? "default" : "secondary"}>
-          {row.original.isActive ? "Aktif" : "Nonaktif"}
+      key: "isActive",
+      title: "Status",
+      render: (_, record) => (
+        <Badge variant={record.isActive ? "default" : "secondary"}>
+          {record.isActive ? "Aktif" : "Nonaktif"}
         </Badge>
       )
     },
     {
-      accessorKey: "lastLogin",
-      header: "Login Terakhir",
-      cell: ({ row }: any) => (
-        row.original.lastLogin 
-          ? new Date(row.original.lastLogin).toLocaleDateString('id-ID')
+      key: "lastLogin",
+      title: "Login Terakhir",
+      render: (_, record) => (
+        record.lastLogin 
+          ? new Date(record.lastLogin).toLocaleDateString('id-ID')
           : 'Belum pernah'
       )
     },
     {
-      id: "actions",
-      header: "Aksi",
-      cell: ({ row }: any) => (
+      key: "actions",
+      title: "Aksi",
+      render: (_, record) => (
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="sm" asChild>
-            <Link href={`/admin/users/edit/${row.original.id}`}>
+            <Link href={`/admin/users/edit/${record.id}`}>
               <Edit className="h-4 w-4" />
             </Link>
           </Button>

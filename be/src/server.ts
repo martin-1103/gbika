@@ -15,6 +15,7 @@ const server = createServer(app);
 websocketService.initializeServer(server);
 
 server.listen(PORT, () => {
+  const wsPath = process.env.WS_PATH || '/livechat/ws';
   console.log(`Server is running on port ${PORT}`);
-  console.log(`WebSocket endpoint available at ws://localhost:${PORT}/livechat/ws`);
+  console.log(`WebSocket endpoint available at ws://localhost:${PORT}${wsPath}`);
 });

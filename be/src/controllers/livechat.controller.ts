@@ -1,6 +1,7 @@
 // LivechatController: Handle livechat session endpoints
 import { Request, Response } from 'express';
 import { createSession } from '../services/session.service';
+import { getApprovedMessages } from '../services/message.service';
 import { validationResult } from 'express-validator';
 
 interface SessionRequestBody {
@@ -71,6 +72,38 @@ const initiateSession = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
+// Get approved messages history
+const getApprovedMessagesHistory = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 20;
+    const offset = (page - 1) * limit;
+
+    const { messages, total } = await getApprovedMessages(limit, offset);
+
+    res.status(200).json({
+      success: true,
+      message: 'Approved messages retrieved successfully',
+      data: {
+        messages,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit)
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Error getting approved messages:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+};
+
 export {
-  initiateSession
+  initiateSession,
+  getApprovedMessagesHistory
 };

@@ -9,7 +9,6 @@ import {
   Heart, 
   Users, 
   Mic, 
-  Clock, 
   MapPin,
   Phone,
   Mail,

@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { apiClient, isAxiosError, getErrorMessage } from "@/lib/api/client"
 import { Loader2, Heart, CheckCircle, AlertCircle } from "lucide-react"
 
 interface TestimonialSubmitFormProps {
@@ -98,35 +99,7 @@ export function TestimonialSubmitForm({ className }: TestimonialSubmitFormProps)
     setIsRateLimited(false)
 
     try {
-      const response = await fetch('/api/testimonials', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      })
-
-      if (response.status === 429) {
-        setIsRateLimited(true)
-        setErrors({ general: "Anda telah mencapai batas pengiriman. Silakan coba lagi nanti." })
-        return
-      }
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        if (errorData.errors && Array.isArray(errorData.errors)) {
-          const fieldErrors: FormErrors = {}
-          errorData.errors.forEach((error: any) => {
-            if (error.path) {
-              fieldErrors[error.path as keyof FormErrors] = error.msg
-            }
-          })
-          setErrors(fieldErrors)
-        } else {
-          setErrors({ general: errorData.message || "Terjadi kesalahan saat mengirim kesaksian" })
-        }
-        return
-      }
+      await apiClient.post('/testimonials', formData)
 
       // Success
       setIsSuccess(true)
@@ -143,9 +116,26 @@ export function TestimonialSubmitForm({ className }: TestimonialSubmitFormProps)
         setIsSuccess(false)
       }, 5000)
 
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error submitting testimonial:', error)
-      setErrors({ general: "Terjadi kesalahan jaringan. Silakan coba lagi." })
+      
+      if (isAxiosError(error) && error.response?.status === 429) {
+        setIsRateLimited(true)
+        setErrors({ general: "Anda telah mencapai batas pengiriman. Silakan coba lagi nanti." })
+        return
+      }
+
+      if (isAxiosError(error) && error.response?.data?.errors && Array.isArray(error.response.data.errors)) {
+        const fieldErrors: FormErrors = {}
+        error.response.data.errors.forEach((err: { path: keyof FormErrors, msg: string }) => {
+          if (err.path) {
+            fieldErrors[err.path] = err.msg
+          }
+        })
+        setErrors(fieldErrors)
+      } else {
+        setErrors({ general: getErrorMessage(error, "Terjadi kesalahan saat mengirim kesaksian") })
+      }
     } finally {
       setIsSubmitting(false)
     }

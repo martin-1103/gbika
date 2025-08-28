@@ -2,10 +2,12 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { AuthGuard } from "@/components/auth"
+import { useAuthStore } from "@/stores/auth-store"
 import {
   Menu,
   X,
@@ -22,10 +24,13 @@ import {
 
 interface AdminLayoutProps {
   children: React.ReactNode
+  requiredRoles?: string[]
 }
 
 // AdminLayout: Main layout wrapper for admin panel with sidebar navigation
-export function AdminLayout({ children }: AdminLayoutProps) {
+export function AdminLayout({ children, requiredRoles = ['admin', 'editor', 'moderator', 'penyiar'] }: AdminLayoutProps) {
+  const router = useRouter()
+  const { user, logout } = useAuthStore()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = usePathname()
 
@@ -78,8 +83,15 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   // Toggle sidebar on mobile
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen)
 
+  // Handle logout
+  const handleLogout = () => {
+    logout()
+    router.push('/admin/login')
+  }
+
   return (
-    <div className="min-h-screen bg-background flex">
+    <AuthGuard requiredRoles={requiredRoles}>
+      <div className="min-h-screen bg-background flex">
       {/* Sidebar */}
       <aside
         className={cn(
@@ -132,13 +144,13 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             <div className="flex items-center space-x-2 px-3 py-2">
               <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
                 <span className="text-xs font-medium text-primary-foreground">
-                  AD
+                  {user?.name?.charAt(0).toUpperCase() || 'U'}
                 </span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">Admin User</p>
+                <p className="text-sm font-medium truncate">{user?.name || 'User'}</p>
                 <p className="text-xs text-muted-foreground truncate">
-                  admin@elshaddaifm.com
+                  {user?.email || 'user@example.com'}
                 </p>
               </div>
             </div>
@@ -146,6 +158,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
               variant="ghost"
               size="sm"
               className="w-full justify-start text-muted-foreground"
+              onClick={handleLogout}
             >
               <LogOut className="h-4 w-4 mr-2" />
               Logout
@@ -188,8 +201,8 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={toggleSidebar}
-        />
-      )}
-    </div>
+        />)}
+      </div>
+    </AuthGuard>
   )
 }

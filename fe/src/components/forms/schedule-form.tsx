@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Save, Clock, Calendar, Loader2, AlertCircle, CheckCircle } from "lucide-react"
+import { apiClient } from "@/lib/api/client"
 
 interface ScheduleFormData {
   title: string
@@ -78,28 +79,12 @@ export function ScheduleForm({
     { value: "lainnya", label: "Lainnya" }
   ]
 
-  // Load schedule data if in edit mode
-  useEffect(() => {
-    if (scheduleId && mode === "edit" && !initialData) {
-      loadSchedule()
-    }
-  }, [scheduleId, mode])
-
-  const loadSchedule = async () => {
+  const loadSchedule = useCallback(async () => {
     try {
       setIsLoadingData(true)
-      const token = localStorage.getItem('auth_token')
-      const response = await fetch(`/api/schedules/${scheduleId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
-
-      if (!response.ok) {
-        throw new Error('Gagal memuat data jadwal')
-      }
-
-      const data = await response.json()
+      const response = await apiClient.get(`/schedules/${scheduleId}`)
+      const data = response.data
+      
       setFormData({
         title: data.title || "",
         description: data.description || "",
@@ -115,7 +100,14 @@ export function ScheduleForm({
     } finally {
       setIsLoadingData(false)
     }
-  }
+  }, [scheduleId])
+
+  // Load schedule data if in edit mode
+  useEffect(() => {
+    if (scheduleId && mode === "edit" && !initialData) {
+      loadSchedule()
+    }
+  }, [scheduleId, mode, initialData, loadSchedule])
 
   // Handle form input changes
   const handleInputChange = (field: keyof ScheduleFormData, value: string | boolean) => {
@@ -157,25 +149,10 @@ export function ScheduleForm({
     setSuccess(false)
 
     try {
-      const token = localStorage.getItem('auth_token')
-      const endpoint = mode === 'create' 
-        ? '/api/schedules' 
-        : `/api/schedules/${scheduleId}`
-      
-      const method = mode === 'create' ? 'POST' : 'PUT'
-      
-      const response = await fetch(endpoint, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(formData)
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || `Gagal ${mode === 'create' ? 'membuat' : 'memperbarui'} jadwal`)
+      if (mode === 'create') {
+        await apiClient.post('/schedules', formData)
+      } else {
+        await apiClient.put(`/schedules/${scheduleId}`, formData)
       }
 
       setSuccess(true)

@@ -2,7 +2,6 @@
 
 import { DataTable, createColumn, createActionColumn, type DataTableColumn } from "./data-table"
 import { Badge } from "./badge"
-import { Button } from "./button"
 import { useState } from "react"
 
 // Example data interface
@@ -74,7 +73,7 @@ export function DataTableExample() {
       title: "Status",
       dataIndex: "status",
       sortable: true,
-      render: (value: string) => {
+      render: (value: unknown) => {
         const variants = {
           active: "default",
           inactive: "secondary",
@@ -82,7 +81,7 @@ export function DataTableExample() {
         } as const
         
         return (
-          <Badge variant={variants[value as keyof typeof variants]}>
+          <Badge variant={variants[(value as string) as keyof typeof variants]}>
             {value === "active" ? "Aktif" : value === "inactive" ? "Tidak Aktif" : "Pending"}
           </Badge>
         )
@@ -99,7 +98,7 @@ export function DataTableExample() {
       title: "Tanggal Dibuat",
       dataIndex: "createdAt",
       sortable: true,
-      render: (value: string) => new Date(value).toLocaleDateString('id-ID')
+      render: (value: unknown) => new Date(value as string).toLocaleDateString('id-ID')
     }),
     createActionColumn([
       {

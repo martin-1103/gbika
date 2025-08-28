@@ -13,6 +13,7 @@ import {
   AlertCircle,
   Loader2
 } from "lucide-react"
+import { apiClient } from "@/lib/api/client"
 
 interface ArticleData {
   id: string
@@ -47,34 +48,28 @@ export default function AdminArticleEditPage() {
     try {
       setState(prev => ({ ...prev, isLoading: true, error: null }))
       
-      const token = localStorage.getItem('auth_token')
-      const response = await fetch(`/api/articles/${articleSlug}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
-      
-      if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error('Artikel tidak ditemukan')
-        }
-        throw new Error('Gagal memuat artikel')
-      }
-      
-      const article = await response.json()
+      const article = await apiClient.get(`/api/articles/${articleSlug}`)
       
       setState(prev => ({
         ...prev,
-        article,
+        article: article.data,
         isLoading: false,
         error: null
       }))
-    } catch (error) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : typeof error === 'object' && error !== null && 'response' in error
+          ? (error as { response?: { status?: number; data?: { message?: string } } }).response?.status === 404
+            ? 'Artikel tidak ditemukan'
+            : (error as { response?: { data?: { message?: string } } }).response?.data?.message || 'Gagal memuat artikel'
+          : 'Gagal memuat artikel'
+      
       setState(prev => ({
         ...prev,
         article: null,
         isLoading: false,
-        error: error instanceof Error ? error.message : 'Terjadi kesalahan'
+        error: errorMessage
       }))
     }
   }
@@ -187,7 +182,7 @@ export default function AdminArticleEditPage() {
             <FileText className="h-16 w-16 mx-auto mb-6 text-muted-foreground opacity-50" />
             <h3 className="text-xl font-semibold mb-2">Artikel Tidak Ditemukan</h3>
             <p className="text-muted-foreground mb-6">
-              Artikel dengan slug "{slug}" tidak dapat ditemukan.
+              Artikel dengan slug &quot;{slug}&quot; tidak dapat ditemukan.
             </p>
             <div className="flex items-center justify-center space-x-4">
               <Button

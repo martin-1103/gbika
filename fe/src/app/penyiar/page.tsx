@@ -259,7 +259,7 @@ export default function PenyiarPage() {
               <Users className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
               <h3 className="text-lg font-semibold mb-2">Penyiar Tidak Ditemukan</h3>
               <p className="text-muted-foreground mb-4">
-                Tidak ada penyiar yang cocok dengan pencarian "{searchQuery}"
+                Tidak ada penyiar yang cocok dengan pencarian &quot;{searchQuery}&quot;
               </p>
               <Button
                 variant="outline"

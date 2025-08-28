@@ -13,6 +13,7 @@ import {
   Loader2,
   Play
 } from "lucide-react"
+import { apiClient } from "@/lib/api/client"
 
 interface ScheduleItem {
   programName: string
@@ -60,15 +61,10 @@ export default function ProgramPage() {
     try {
       setState(prev => ({ ...prev, isLoading: true, error: null }))
       
-      const response = await fetch('/api/programs/schedule')
+      const response = await apiClient.get('/programs/schedule')
       
-      if (!response.ok) {
-        throw new Error('Gagal memuat jadwal program')
-      }
-      
-      const data = await response.json()
       setState({
-        schedule: data.data,
+        schedule: response.data.data,
         isLoading: false,
         error: null
       })

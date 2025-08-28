@@ -1,7 +1,7 @@
 // LivechatRoutes: Route definitions for livechat endpoints
 import express from 'express';
 import rateLimit from 'express-rate-limit';
-import { initiateSession } from '../controllers/livechat.controller';
+import { initiateSession, getApprovedMessagesHistory } from '../controllers/livechat.controller';
 import { moderateMessageEndpoint } from '../controllers/moderation.controller';
 import { validateSessionInitiation } from '../validators/livechat.validator';
 import { validateMessageModeration } from '../validators/moderation.validator';
@@ -40,5 +40,8 @@ router.post('/messages/:id/moderate',
   validateMessageModeration,
   moderateMessageEndpoint
 );
+
+// GET /api/livechat/messages/approved - Get approved messages history
+router.get('/messages/approved', getApprovedMessagesHistory);
 
 export default router;

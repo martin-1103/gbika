@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Eye, EyeOff, Loader2, Radio } from "lucide-react"
+import { apiClient, isAxiosError } from "@/lib/api/client"
+import { useAuthStore } from "@/stores/auth-store"
 
 interface LoginFormData {
   email: string
@@ -21,9 +23,10 @@ interface LoginFormProps {
 // LoginForm: Authentication form for admin/staff login
 export function LoginForm({ onSuccess }: LoginFormProps) {
   const router = useRouter()
+  const { login } = useAuthStore()
   const [formData, setFormData] = useState<LoginFormData>({
-    email: "",
-    password: ""
+    email: "admin@elshadaifm.com",
+    password: "admin123"
   })
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -48,35 +51,30 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
     setError(null)
 
     try {
-      // TODO: Replace with actual API endpoint when backend is ready
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || 'Login failed')
-      }
-
-      const data = await response.json()
+      const response = await apiClient.post('/auth/login', formData)
       
-      // Store authentication token
-      if (data.token) {
-        localStorage.setItem('auth_token', data.token)
+      // Store authentication data in Zustand store
+      if (response.data.accessToken && response.data.user) {
+        login(response.data.user, response.data.accessToken)
       }
 
-      // Call success callback or redirect
+      // Call success callback or redirect based on user role
       if (onSuccess) {
         onSuccess()
       } else {
-        router.push('/admin/dashboard')
+        const userRole = response.data.user?.role
+        if (userRole === 'penyiar') {
+          router.push('/penyiar/dashboard')
+        } else {
+          router.push('/admin/dashboard')
+        }
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred during login')
+    } catch (err: unknown) {
+      if (isAxiosError(err) && err.response?.data?.message) {
+        setError(err.response.data.message)
+      } else {
+        setError('An error occurred during login')
+      }
     } finally {
       setIsLoading(false)
     }

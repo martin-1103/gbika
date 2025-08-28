@@ -2,16 +2,16 @@
 
 import { useState, useEffect } from "react"
 import { AdminLayout } from "@/components/layout"
-import { DataTable } from "@/components/ui"
+import { DataTable, DataTableColumn } from "@/components/ui/data-table"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { 
-  MessageSquare, 
-  Search, 
-  Check, 
-  X, 
+import {
+  MessageSquare,
+  Search,
+  Check,
+  X,
   Eye,
   Calendar,
   AlertCircle,
@@ -19,6 +19,7 @@ import {
   MoreHorizontal,
   Filter
 } from "lucide-react"
+import { apiClient, getErrorMessage } from "@/lib/api/client"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -74,55 +75,44 @@ export default function AdminTestimonialsPage() {
   // Fetch testimonials with admin privileges
   const fetchTestimonials = async (page: number = 1, search: string = "", status: string = "all") => {
     try {
-      setState(prev => ({ 
-        ...prev, 
+      setState(prev => ({
+        ...prev,
         isLoading: page === 1,
-        error: null 
+        error: null
       }))
-      
+
       const params = new URLSearchParams({
         page: page.toString(),
         limit: "20",
         admin: "true" // Include all statuses
       })
-      
+
       if (search) {
         params.append('search', search)
       }
-      
+
       if (status !== "all") {
         params.append('status', status)
       }
-      
-      const token = localStorage.getItem('auth_token')
-      const response = await fetch(`/api/testimonials?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
-      
-      if (!response.ok) {
-        throw new Error('Gagal memuat daftar kesaksian')
-      }
-      
-      const data = await response.json()
-      
+
+      const data = await apiClient.get(`/testimonials?${params}`)
+
       setState(prev => ({
         ...prev,
         testimonials: data.data || [],
         currentPage: page,
-        totalPages: data.meta?.totalPages || 1,
-        totalItems: data.meta?.total || 0,
+        totalPages: data.data?.meta?.totalPages || 1,
+        totalItems: data.data?.meta?.total || 0,
         searchQuery: search,
         statusFilter: status,
         isLoading: false
       }))
-    } catch (error) {
+    } catch (error: unknown) {
       setState(prev => ({
         ...prev,
         testimonials: [],
         isLoading: false,
-        error: error instanceof Error ? error.message : 'Terjadi kesalahan'
+        error: getErrorMessage(error, 'Gagal memuat daftar kesaksian')
       }))
     }
   }
@@ -130,28 +120,16 @@ export default function AdminTestimonialsPage() {
   // Moderate testimonial (approve/reject)
   const moderateTestimonial = async (id: string, action: "approve" | "reject") => {
     try {
-      const token = localStorage.getItem('auth_token')
-      const response = await fetch(`/api/testimonials/${id}/moderate`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          status: action === "approve" ? "approved" : "rejected"
-        })
+      await apiClient.post(`/testimonials/${id}/moderate`, {
+        status: action === "approve" ? "approved" : "rejected"
       })
-
-      if (!response.ok) {
-        throw new Error(`Gagal ${action === "approve" ? "menyetujui" : "menolak"} kesaksian`)
-      }
 
       // Refresh testimonials list
       fetchTestimonials(state.currentPage, state.searchQuery, state.statusFilter)
-    } catch (error) {
+    } catch (error: unknown) {
       setState(prev => ({
         ...prev,
-        error: error instanceof Error ? error.message : 'Gagal memproses moderasi'
+        error: getErrorMessage(error, `Gagal ${action === "approve" ? "menyetujui" : "menolak"} kesaksian`)
       }))
     }
   }
@@ -174,7 +152,7 @@ export default function AdminTestimonialsPage() {
   }
 
   // Get status badge variant
-  const getStatusVariant = (status: string) => {
+  const getStatusVariant = (status: Testimonial['status']) => {
     switch (status) {
       case 'approved': return 'default'
       case 'rejected': return 'destructive'
@@ -183,7 +161,7 @@ export default function AdminTestimonialsPage() {
   }
 
   // Get status label
-  const getStatusLabel = (status: string) => {
+  const getStatusLabel = (status: Testimonial['status']) => {
     switch (status) {
       case 'approved': return 'Disetujui'
       case 'rejected': return 'Ditolak'
@@ -192,12 +170,11 @@ export default function AdminTestimonialsPage() {
   }
 
   // Table columns
-  const columns = [
+  const columns: DataTableColumn<Testimonial>[] = [
     {
       key: "title",
       title: "Judul & Pengirim",
-      dataIndex: "title",
-      render: (value: any, record: Testimonial) => (
+      render: (_, record) => (
         <div className="max-w-[300px]">
           <p className="font-medium truncate">{record.title}</p>
           <p className="text-sm text-muted-foreground">
@@ -210,8 +187,7 @@ export default function AdminTestimonialsPage() {
     {
       key: "content",
       title: "Isi Kesaksian",
-      dataIndex: "content",
-      render: (value: any, record: Testimonial) => (
+      render: (_, record) => (
         <div className="max-w-[400px]">
           <p className="text-sm line-clamp-3">
             {record.content}
@@ -222,8 +198,7 @@ export default function AdminTestimonialsPage() {
     {
       key: "status",
       title: "Status",
-      dataIndex: "status",
-      render: (value: any, record: Testimonial) => (
+      render: (_, record) => (
         <Badge variant={getStatusVariant(record.status)}>
           {getStatusLabel(record.status)}
         </Badge>
@@ -232,8 +207,7 @@ export default function AdminTestimonialsPage() {
     {
       key: "createdAt",
       title: "Tanggal Kirim",
-      dataIndex: "createdAt",
-      render: (value: any, record: Testimonial) => {
+      render: (_, record) => {
         const date = new Date(record.createdAt)
         return (
           <div>
@@ -250,7 +224,7 @@ export default function AdminTestimonialsPage() {
     {
       key: "actions",
       title: "Aksi",
-      render: (value: any, record: Testimonial) => (
+      render: (_, record) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-8 w-8 p-0">

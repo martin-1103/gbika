@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { FileText, Heart, Users, Calendar } from "lucide-react"
 import { useEffect, useState } from "react"
+import { apiClient } from "@/lib/api/client"
 
 interface DashboardStats {
   totalArticles: number
@@ -45,11 +46,8 @@ export default function AdminDashboard() {
         setError(null)
 
         // Fetch recent articles
-        const articlesResponse = await fetch('/api/articles?limit=5&sort_by=published_at&sort_order=desc')
-        if (articlesResponse.ok) {
-          const articlesData = await articlesResponse.json()
-          setRecentArticles(articlesData.data || [])
-        }
+        const articlesData = await apiClient.get('/articles?limit=5&sort_by=published_at&sort_order=desc')
+        setRecentArticles(articlesData.data || [])
 
         // Mock stats for now (would need actual endpoints)
         setStats({
@@ -75,8 +73,13 @@ export default function AdminDashboard() {
           }
         ])
 
-      } catch (err) {
-        setError('Gagal memuat data dashboard')
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error 
+          ? err.message 
+          : typeof err === 'object' && err !== null && 'response' in err
+            ? (err as { response?: { data?: { message?: string } } }).response?.data?.message || 'Gagal memuat data dashboard'
+            : 'Gagal memuat data dashboard'
+        setError(errorMessage)
         console.error('Dashboard fetch error:', err)
       } finally {
         setLoading(false)
@@ -96,7 +99,7 @@ export default function AdminDashboard() {
   }
 
   return (
-    <AdminLayout>
+    <AdminLayout requiredRoles={['admin', 'moderator']}>
       <div className="space-y-6">
         {/* Page Header */}
         <div>

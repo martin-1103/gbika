@@ -26,11 +26,11 @@ import {
 import { cn } from "@/lib/utils"
 
 // Column definition interface
-export interface DataTableColumn<T = any> {
+export interface DataTableColumn<T = Record<string, unknown>> {
   key: string
   title: string
   dataIndex?: keyof T
-  render?: (value: any, record: T, index: number) => React.ReactNode
+  render?: (value: unknown, record: T, index: number) => React.ReactNode
   sortable?: boolean
   filterable?: boolean
   width?: string | number
@@ -56,11 +56,11 @@ export interface DataTableSort {
 
 // Filter configuration
 export interface DataTableFilter {
-  [key: string]: any
+  [key: string]: unknown
 }
 
 // DataTable component props
-export interface DataTableProps<T = any> {
+export interface DataTableProps<T = Record<string, unknown>> {
   columns: DataTableColumn<T>[]
   data: T[]
   loading?: boolean
@@ -78,7 +78,7 @@ export interface DataTableProps<T = any> {
 }
 
 // DataTable: Reusable table component with pagination, sorting, and filtering
-export function DataTable<T = any>({
+export function DataTable<T = Record<string, unknown>>({
   columns,
   data,
   loading = false,
@@ -348,12 +348,12 @@ export function DataTable<T = any>({
 }
 
 // Export column helper for easier column definition
-export const createColumn = <T = any>(
+export const createColumn = <T = Record<string, unknown>>(
   column: DataTableColumn<T>
 ): DataTableColumn<T> => column
 
 // Export action column helper
-export const createActionColumn = <T = any>(
+export const createActionColumn = <T = Record<string, unknown>>(
   actions: {
     label: string
     onClick: (record: T) => void

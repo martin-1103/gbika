@@ -1,10 +1,9 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { 
   Radio, 
@@ -22,6 +21,7 @@ import {
 } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { id } from "date-fns/locale"
+import { useAuthStore } from "@/stores/auth-store"
 
 interface ChatMessage {
   id: string
@@ -33,6 +33,7 @@ interface ChatMessage {
   guestCity?: string
   isPinned?: boolean
   isRead?: boolean
+  status: 'pending' | 'approved' | 'rejected' | 'blocked'
 }
 
 interface OnAirState {
@@ -66,7 +67,7 @@ export function OnAirPanel({
   })
 
   const wsRef = useRef<WebSocket | null>(null)
-  const reconnectTimeoutRef = useRef<NodeJS.Timeout>()
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   // Auto-scroll to latest messages
@@ -74,13 +75,64 @@ export function OnAirPanel({
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }
 
+  // Handle incoming WebSocket messages
+  const handleWebSocketMessage = useCallback((data: { type: string; message: ChatMessage; messages: ChatMessage[]; count: number }) => {
+    switch (data.type) {
+      case 'new_approved_message':
+        // Add new approved message
+        setState(prev => ({
+          ...prev,
+          messages: [...prev.messages, data.message].slice(-50) // Keep last 50
+        }))
+        // Auto-scroll to new message
+        setTimeout(scrollToBottom, 100)
+        break
+        
+      case 'approved_messages_history':
+        // Load initial approved messages
+        setState(prev => ({
+          ...prev,
+          messages: data.messages.map((msg: ChatMessage) => ({
+            ...msg,
+            isRead: false,
+            isPinned: false
+          })),
+          isLoading: false
+        }))
+        setTimeout(scrollToBottom, 100)
+        break
+        
+      case 'listener_count':
+        // Update online listener count
+        setState(prev => ({
+          ...prev,
+          onlineCount: data.count
+        }))
+        break
+    }
+  }, [])
+
+  // Get auth state
+  const { token, isAuthenticated } = useAuthStore()
+
   // Connect to WebSocket for approved messages
-  const connectWebSocket = () => {
+  const connectWebSocket = useCallback(() => {
     try {
       setState(prev => ({ ...prev, wsStatus: 'connecting', error: null }))
       
-      const token = localStorage.getItem('auth_token')
-      const wsUrl = `ws://localhost:3001/livechat/ws?token=${token}&role=broadcaster`
+      // Check if user is authenticated
+      if (!isAuthenticated || !token) {
+        setState(prev => ({ 
+          ...prev, 
+          wsStatus: 'disconnected',
+          error: 'Tidak ada token autentikasi. Silakan login kembali.',
+          isLoading: false
+        }))
+        return
+      }
+      
+      const wsBaseUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:3000'
+      const wsUrl = `${wsBaseUrl}/livechat/ws?token=${encodeURIComponent(token)}&role=broadcaster`
       
       wsRef.current = new WebSocket(wsUrl)
 
@@ -114,51 +166,14 @@ export function OnAirPanel({
           error: 'Koneksi WebSocket gagal'
         }))
       }
-    } catch (error) {
+    } catch {
       setState(prev => ({ 
         ...prev, 
         wsStatus: 'disconnected',
         error: 'Gagal menghubungkan ke server'
       }))
     }
-  }
-
-  // Handle incoming WebSocket messages
-  const handleWebSocketMessage = (data: any) => {
-    switch (data.type) {
-      case 'new_approved_message':
-        // Add new approved message
-        setState(prev => ({
-          ...prev,
-          messages: [...prev.messages, data.message].slice(-50) // Keep last 50
-        }))
-        // Auto-scroll to new message
-        setTimeout(scrollToBottom, 100)
-        break
-        
-      case 'approved_messages_history':
-        // Load initial approved messages
-        setState(prev => ({
-          ...prev,
-          messages: data.messages.map((msg: any) => ({
-            ...msg,
-            isRead: false,
-            isPinned: false
-          })),
-          isLoading: false
-        }))
-        setTimeout(scrollToBottom, 100)
-        break
-        
-      case 'listener_count':
-        // Update online listener count
-        setState(prev => ({
-          ...prev,
-          onlineCount: data.count
-        }))
-        break
-    }
-  }
+  }, [handleWebSocketMessage, isAuthenticated, token])
 
   // Toggle pin message
   const togglePin = (messageId: string) => {
@@ -219,7 +234,7 @@ export function OnAirPanel({
     return state.messages.filter(msg => !msg.isRead).length
   }
 
-  // Connect on component mount
+  // Connect on component mount and when auth state changes
   useEffect(() => {
     connectWebSocket()
     
@@ -229,7 +244,7 @@ export function OnAirPanel({
       }
       wsRef.current?.close()
     }
-  }, [])
+  }, [connectWebSocket, isAuthenticated, token])
 
   // Message component
   const MessageCard = ({ 

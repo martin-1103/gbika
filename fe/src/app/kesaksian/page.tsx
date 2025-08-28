@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { PublicLayout } from "@/components/layout"
@@ -13,10 +13,10 @@ import {
   ChevronLeft, 
   ChevronRight, 
   AlertCircle,
-  Loader2,
   Heart,
   Plus
 } from "lucide-react"
+import { apiClient, getErrorMessage } from "@/lib/api/client"
 
 interface Testimonial {
   id: string
@@ -35,8 +35,8 @@ interface TestimonialListState {
   totalItems: number
 }
 
-// Testimonials List page: Display approved testimonials with pagination
-export default function TestimonialsPage() {
+// Inner component that uses useSearchParams
+function TestimonialsContent() {
   const searchParams = useSearchParams()
   const [state, setState] = useState<TestimonialListState>({
     testimonials: [],
@@ -48,7 +48,7 @@ export default function TestimonialsPage() {
   })
 
   // Fetch testimonials from API
-  const fetchTestimonials = async (page: number = 1) => {
+  const fetchTestimonials = useCallback(async (page: number = 1) => {
     try {
       setState(prev => ({ 
         ...prev, 
@@ -61,31 +61,25 @@ export default function TestimonialsPage() {
         limit: '9' // 3x3 grid
       })
       
-      const response = await fetch(`/api/testimonials?${params}`)
-      
-      if (!response.ok) {
-        throw new Error('Gagal memuat daftar kesaksian')
-      }
-      
-      const data = await response.json()
+      const response = await apiClient.get(`/api/testimonials?${params}`)
       
       setState(prev => ({
         ...prev,
-        testimonials: data.data || [],
+        testimonials: response.data.data || [],
         currentPage: page,
-        totalPages: data.meta?.totalPages || 1,
-        totalItems: data.meta?.total || 0,
+        totalPages: response.data.meta?.totalPages || 1,
+        totalItems: response.data.meta?.total || 0,
         isLoading: false
       }))
-    } catch (error) {
+    } catch (error: unknown) {
       setState(prev => ({
         ...prev,
         testimonials: [],
         isLoading: false,
-        error: error instanceof Error ? error.message : 'Terjadi kesalahan'
+        error: getErrorMessage(error, 'Gagal memuat daftar kesaksian')
       }))
     }
-  }
+  }, [])
 
   // Handle page change
   const handlePageChange = (page: number) => {
@@ -119,7 +113,7 @@ export default function TestimonialsPage() {
   // Load initial data
   useEffect(() => {
     fetchTestimonials(state.currentPage)
-  }, [])
+  }, [fetchTestimonials, state.currentPage])
 
   // Testimonial skeleton for loading state
   const TestimonialSkeleton = () => (
@@ -194,10 +188,7 @@ export default function TestimonialsPage() {
             {state.testimonials.map((testimonial) => (
               <TestimonialCard
                 key={testimonial.id}
-                name={testimonial.name}
-                city={testimonial.city}
-                title={testimonial.title}
-                content={testimonial.content}
+                testimonial={testimonial}
                 className="h-full"
               />
             ))}
@@ -272,7 +263,7 @@ export default function TestimonialsPage() {
               <MessageSquare className="h-12 w-12 mx-auto mb-4 text-blue-500" />
               <h3 className="text-2xl font-semibold mb-2">Kuasa Kesaksian</h3>
               <p className="text-muted-foreground mb-4">
-                "Dan mereka mengalahkan dia oleh darah Anak Domba dan oleh perkataan kesaksian mereka..." 
+                &quot;Dan mereka mengalahkan dia oleh darah Anak Domba dan oleh perkataan kesaksian mereka...&quot; 
                 - Wahyu 12:11
               </p>
               <p className="text-sm text-muted-foreground">
@@ -306,5 +297,37 @@ export default function TestimonialsPage() {
         )}
       </div>
     </PublicLayout>
+  )
+}
+
+// Loading component for Suspense boundary
+function TestimonialsLoading() {
+  return (
+    <PublicLayout>
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold mb-4">Kesaksian Umat</h1>
+          <div className="space-y-2">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-4 w-full max-w-md mx-auto" />
+            ))}
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton key={i} className="h-64 w-full" />
+          ))}
+        </div>
+      </div>
+    </PublicLayout>
+  )
+}
+
+// Main component with Suspense boundary
+export default function TestimonialsPage() {
+  return (
+    <Suspense fallback={<TestimonialsLoading />}>
+      <TestimonialsContent />
+    </Suspense>
   )
 }

@@ -1,7 +1,7 @@
 "use client"
 
 import { AdminLayout } from "@/components/layout"
-import { DataTable } from "@/components/ui"
+import { DataTable, DataTableColumn } from "@/components/ui/data-table"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -9,17 +9,27 @@ import {
   Calendar, 
   Search, 
   Plus,
-  Clock,
   Edit,
   Trash2,
   Filter
 } from "lucide-react"
 import Link from "next/link"
 
+interface Schedule {
+  id: string;
+  title: string;
+  day: string;
+  startTime: string;
+  endTime: string;
+  presenter: string;
+  category: string;
+  isActive: boolean;
+}
+
 // Admin Schedules Management page
 export default function AdminSchedulesPage() {
   // Mock data - would be fetched from API
-  const schedules = [
+  const schedules: Schedule[] = [
     {
       id: "1",
       title: "Renungan Fajar",
@@ -32,49 +42,50 @@ export default function AdminSchedulesPage() {
     }
   ]
 
-  const columns = [
+  const columns: DataTableColumn<Schedule>[] = [
     {
-      accessorKey: "title",
-      header: "Program",
-      cell: ({ row }: any) => (
+      key: "title",
+      title: "Program",
+      render: (_, record) => (
         <div>
-          <p className="font-medium">{row.original.title}</p>
-          <p className="text-sm text-muted-foreground">{row.original.category}</p>
+          <p className="font-medium">{record.title}</p>
+          <p className="text-sm text-muted-foreground">{record.category}</p>
         </div>
       )
     },
     {
-      accessorKey: "schedule",
-      header: "Jadwal",
-      cell: ({ row }: any) => (
+      key: "schedule",
+      title: "Jadwal",
+      render: (_, record) => (
         <div>
-          <p className="font-medium">{row.original.day}</p>
+          <p className="font-medium">{record.day}</p>
           <p className="text-sm text-muted-foreground">
-            {row.original.startTime} - {row.original.endTime}
+            {record.startTime} - {record.endTime}
           </p>
         </div>
       )
     },
     {
-      accessorKey: "presenter",
-      header: "Penyiar"
+      key: "presenter",
+      title: "Penyiar",
+      dataIndex: "presenter"
     },
     {
-      accessorKey: "isActive",
-      header: "Status",
-      cell: ({ row }: any) => (
-        <Badge variant={row.original.isActive ? "default" : "secondary"}>
-          {row.original.isActive ? "Aktif" : "Nonaktif"}
+      key: "isActive",
+      title: "Status",
+      render: (_, record) => (
+        <Badge variant={record.isActive ? "default" : "secondary"}>
+          {record.isActive ? "Aktif" : "Nonaktif"}
         </Badge>
       )
     },
     {
-      id: "actions",
-      header: "Aksi",
-      cell: ({ row }: any) => (
+      key: "actions",
+      title: "Aksi",
+      render: (_, record) => (
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="sm" asChild>
-            <Link href={`/admin/schedules/edit/${row.original.id}`}>
+            <Link href={`/admin/schedules/edit/${record.id}`}>
               <Edit className="h-4 w-4" />
             </Link>
           </Button>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { PublicLayout } from "@/components/layout"
@@ -15,15 +15,23 @@ import {
   ChevronLeft, 
   ChevronRight, 
   AlertCircle,
-  Loader2,
-  Filter
+  Loader2
 } from "lucide-react"
+import { apiClient, isAxiosError } from "@/lib/api/client"
 
 interface Article {
   id: string
   title: string
   slug: string
   published_at: string
+  content: string
+  status: 'draft' | 'published'
+  createdAt: string
+  excerpt?: string
+  category?: string
+  tags?: string[]
+  author?: string
+  image?: string
 }
 
 interface ArticleListState {
@@ -38,7 +46,7 @@ interface ArticleListState {
 }
 
 // Renungan List page: Display paginated list of articles
-export default function RenunganPage() {
+function RenunganContent() {
   const searchParams = useSearchParams()
   const [state, setState] = useState<ArticleListState>({
     articles: [],
@@ -52,7 +60,7 @@ export default function RenunganPage() {
   })
 
   // Fetch articles from API
-  const fetchArticles = async (page: number = 1, search: string = '') => {
+  const fetchArticles = useCallback(async (page: number = 1, search: string = '') => {
     try {
       setState(prev => ({ 
         ...prev, 
@@ -72,34 +80,28 @@ export default function RenunganPage() {
         params.append('search', search)
       }
       
-      const response = await fetch(`/api/articles?${params}`)
-      
-      if (!response.ok) {
-        throw new Error('Gagal memuat daftar renungan')
-      }
-      
-      const data = await response.json()
+      const data = await apiClient.get(`/articles?${params}`)
       
       setState(prev => ({
         ...prev,
         articles: data.data || [],
         currentPage: page,
-        totalPages: data.meta?.totalPages || 1,
-        totalItems: data.meta?.total || 0,
+        totalPages: data.data?.meta?.totalPages || 1,
+        totalItems: data.data?.meta?.total || 0,
         searchQuery: search,
         isLoading: false,
         isSearching: false
       }))
-    } catch (error) {
+    } catch (error: unknown) {
       setState(prev => ({
         ...prev,
         articles: [],
         isLoading: false,
         isSearching: false,
-        error: error instanceof Error ? error.message : 'Terjadi kesalahan'
+        error: isAxiosError(error) ? error.response?.data?.message : 'Gagal memuat daftar renungan'
       }))
     }
-  }
+  }, [])
 
   // Handle search
   const handleSearch = (query: string) => {
@@ -151,7 +153,7 @@ export default function RenunganPage() {
   // Load initial data
   useEffect(() => {
     fetchArticles(state.currentPage, state.searchQuery)
-  }, [])
+  }, [fetchArticles, state.currentPage, state.searchQuery])
 
   // Article skeleton for loading state
   const ArticleSkeleton = () => (
@@ -199,11 +201,11 @@ export default function RenunganPage() {
           <div className="text-center text-muted-foreground">
             {state.totalItems > 0 ? (
               <p>
-                Ditemukan {state.totalItems} renungan untuk "{state.searchQuery}"
+                Ditemukan {state.totalItems} renungan untuk &quot;{state.searchQuery}&quot;
               </p>
             ) : (
               <p>
-                Tidak ada renungan yang ditemukan untuk "{state.searchQuery}"
+                Tidak ada renungan yang ditemukan untuk &quot;{state.searchQuery}&quot;
               </p>
             )}
           </div>
@@ -240,9 +242,7 @@ export default function RenunganPage() {
             {state.articles.map((article) => (
               <Link key={article.id} href={`/renungan/${article.slug}`}>
                 <ArticleCard
-                  title={article.title}
-                  slug={article.slug}
-                  publishedAt={article.published_at}
+                  article={article}
                   className="h-full transition-transform hover:scale-105"
                 />
               </Link>
@@ -326,5 +326,42 @@ export default function RenunganPage() {
         )}
       </div>
     </PublicLayout>
+  )
+}
+
+// Loading component for Suspense boundary
+function RenunganLoading() {
+  return (
+    <PublicLayout>
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold mb-4">Renungan Harian</h1>
+          <div className="space-y-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-4 w-full max-w-md mx-auto" />
+            ))}
+          </div>
+        </div>
+        
+        <div className="mb-8">
+          <Skeleton className="h-10 w-full max-w-md" />
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <Skeleton key={i} className="h-64 w-full" />
+          ))}
+        </div>
+      </div>
+    </PublicLayout>
+  )
+}
+
+// Main component with Suspense boundary
+export default function RenunganPage() {
+  return (
+    <Suspense fallback={<RenunganLoading />}>
+      <RenunganContent />
+    </Suspense>
   )
 }

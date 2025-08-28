@@ -21,9 +21,9 @@ export default function PrayerServicePage() {
             Layanan Doa
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            "Sebab itu hendaklah kamu saling mengaku dosamu dan saling mendoakan, 
+            &quot;Sebab itu hendaklah kamu saling mengaku dosamu dan saling mendoakan, 
             supaya kamu sembuh. Doa orang yang benar, bila dengan yakin didoakan, 
-            sangat besar kuasanya." - Yakobus 5:16
+            sangat besar kuasanya.&quot; - Yakobus 5:16
           </p>
         </div>
 
@@ -129,7 +129,7 @@ export default function PrayerServicePage() {
                   yang akan mengetahui isi permohonan Anda.
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Jika Anda memilih opsi "anonim", identitas Anda tidak akan 
+                  Jika Anda memilih opsi &quot;anonim&quot;, identitas Anda tidak akan 
                   disebutkan dalam sesi doa.
                 </p>
               </CardContent>
@@ -166,8 +166,8 @@ export default function PrayerServicePage() {
           <Card className="bg-primary text-primary-foreground max-w-4xl mx-auto">
             <CardContent className="p-8">
               <h3 className="text-2xl font-bold mb-4">
-                "Mintalah, maka akan diberikan kepadamu; carilah, maka kamu akan mendapat; 
-                ketoklah, maka pintu akan dibukakan bagimu."
+                &quot;Mintalah, maka akan diberikan kepadamu; carilah, maka kamu akan mendapat; 
+                ketoklah, maka pintu akan dibukakan bagimu.&quot;
               </h3>
               <p className="text-primary-foreground/80 text-lg">
                 Matius 7:7 - Tuhan selalu mendengar doa anak-anak-Nya

@@ -21,7 +21,7 @@ export default function SongRequestPage() {
             Request Lagu
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            "Bernyanyilah bagi TUHAN nyanyian baru, bernyanyilah bagi TUHAN, hai segenap bumi!" - Mazmur 96:1
+            &quot;Bernyanyilah bagi TUHAN nyanyian baru, bernyanyilah bagi TUHAN, hai segenap bumi!&quot; - Mazmur 96:1
           </p>
         </div>
 
@@ -163,7 +163,7 @@ export default function SongRequestPage() {
           <Card className="bg-primary text-primary-foreground max-w-4xl mx-auto">
             <CardContent className="p-8">
               <h3 className="text-2xl font-bold mb-4">
-                "Nyanyikanlah syukur kepada TUHAN dengan kecapi, bermazmurlah bagi-Nya dengan gambus sepuluh tali!"
+                &quot;Nyanyikanlah syukur kepada TUHAN dengan kecapi, bermazmurlah bagi-Nya dengan gambus sepuluh tali!&quot;
               </h3>
               <p className="text-primary-foreground/80 text-lg">
                 Mazmur 33:2 - Mari bersama memuji Tuhan melalui musik

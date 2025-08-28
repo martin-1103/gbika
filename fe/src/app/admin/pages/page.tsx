@@ -31,43 +31,46 @@ export default function AdminPagesPage() {
 
   const columns = [
     {
-      accessorKey: "title",
-      header: "Judul Halaman",
-      cell: ({ row }: any) => (
+      key: "title",
+      title: "Judul Halaman",
+      dataIndex: "title" as keyof typeof pages[0],
+      render: (_: unknown, record: typeof pages[0]) => (
         <div>
-          <p className="font-medium">{row.original.title}</p>
-          <p className="text-sm text-muted-foreground">/{row.original.slug}</p>
+          <p className="font-medium">{record.title}</p>
+          <p className="text-sm text-muted-foreground">/{record.slug}</p>
         </div>
       )
     },
     {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }: any) => (
-        <Badge variant={row.original.status === "published" ? "default" : "secondary"}>
-          {row.original.status === "published" ? "Dipublikasi" : "Draft"}
+      key: "status",
+      title: "Status",
+      dataIndex: "status" as keyof typeof pages[0],
+      render: (_: unknown, record: typeof pages[0]) => (
+        <Badge variant={record.status === "published" ? "default" : "secondary"}>
+          {record.status === "published" ? "Dipublikasi" : "Draft"}
         </Badge>
       )
     },
     {
-      accessorKey: "updatedAt",
-      header: "Terakhir Diupdate",
-      cell: ({ row }: any) => (
-        new Date(row.original.updatedAt).toLocaleDateString('id-ID')
+      key: "updatedAt",
+      title: "Terakhir Diupdate",
+      dataIndex: "updatedAt" as keyof typeof pages[0],
+      render: (_: unknown, record: typeof pages[0]) => (
+        new Date(record.updatedAt).toLocaleDateString('id-ID')
       )
     },
     {
-      id: "actions",
-      header: "Aksi",
-      cell: ({ row }: any) => (
+      key: "actions",
+      title: "Aksi",
+      render: (_: unknown, record: typeof pages[0]) => (
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="sm" asChild>
-            <Link href={`/${row.original.slug}`} target="_blank">
+            <Link href={`/${record.slug}`} target="_blank">
               <Eye className="h-4 w-4" />
             </Link>
           </Button>
           <Button variant="ghost" size="sm" asChild>
-            <Link href={`/admin/pages/edit/${row.original.id}`}>
+            <Link href={`/admin/pages/edit/${record.id}`}>
               <Edit className="h-4 w-4" />
             </Link>
           </Button>

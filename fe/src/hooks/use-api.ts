@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { AxiosRequestConfig } from 'axios'
 import { apiRequest } from '@/lib/api/client'
 
-interface UseApiQueryOptions<T> {
+interface UseApiQueryOptions {
   queryKey: string[]
   config: AxiosRequestConfig
   enabled?: boolean
@@ -20,7 +20,7 @@ interface UseApiMutationOptions<T, V> {
 
 // Custom hook for API queries using React Query
 export const useApiQuery = <T>(
-  options: UseApiQueryOptions<T>
+  options: UseApiQueryOptions
 ) => {
   return useQuery({
     queryKey: options.queryKey,
@@ -56,7 +56,13 @@ export const useApiMutation = <T, V = void>(
 
 // Hook for fetching user data
 export const useUser = (userId?: string) => {
-  return useApiQuery<any>({
+  return useApiQuery<{
+    id: string;
+    name: string;
+    email: string;
+    role?: string;
+    [key: string]: unknown;
+  }>({
     queryKey: ['user', userId || ''],
     config: {
       method: 'GET',
@@ -68,7 +74,13 @@ export const useUser = (userId?: string) => {
 
 // Hook for fetching current user profile
 export const useProfile = () => {
-  return useApiQuery<any>({
+  return useApiQuery<{
+    id: string;
+    name: string;
+    email: string;
+    role?: string;
+    [key: string]: unknown;
+  }>({
     queryKey: ['profile'],
     config: {
       method: 'GET',

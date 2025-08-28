@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { apiClient, getErrorMessage } from "@/lib/api/client"
 import { 
   Phone, 
   Mail, 
@@ -78,17 +79,7 @@ export default function KontakPage() {
     setError(null)
 
     try {
-      const response = await fetch('/api/contact', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      })
-
-      if (!response.ok) {
-        throw new Error('Gagal mengirim pesan')
-      }
+      await apiClient.post('/contact', formData)
 
       setIsSuccess(true)
       setFormData({
@@ -105,8 +96,8 @@ export default function KontakPage() {
         setIsSuccess(false)
       }, 5000)
 
-    } catch (error) {
-      setError('Gagal mengirim pesan. Silakan coba lagi.')
+    } catch (error: unknown) {
+      setError(getErrorMessage(error, 'Gagal mengirim pesan. Silakan coba lagi.'))
     } finally {
       setIsSubmitting(false)
     }
@@ -485,7 +476,7 @@ export default function KontakPage() {
                 <h3 className="font-semibold mb-2">Kapan jadwal siaran?</h3>
                 <p className="text-sm text-muted-foreground">
                   Radio Gbika mengudara 24/7. Lihat jadwal program lengkap di 
-                  halaman "Program & Jadwal" untuk program-program spesial.
+                  halaman &quot;Program & Jadwal&quot; untuk program-program spesial.
                 </p>
               </div>
             </div>

@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2, Music, CheckCircle, AlertCircle } from "lucide-react"
+import { apiClient, isAxiosError, getErrorMessage } from "@/lib/api/client"
 
 interface SongRequestFormProps {
   className?: string
@@ -85,35 +86,7 @@ export function SongRequestForm({ className }: SongRequestFormProps) {
     setIsRateLimited(false)
 
     try {
-      const response = await fetch('/api/services/song-request', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      })
-
-      if (response.status === 429) {
-        setIsRateLimited(true)
-        setErrors({ general: "Anda telah mencapai batas pengiriman. Silakan coba lagi nanti." })
-        return
-      }
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        if (errorData.errors && Array.isArray(errorData.errors)) {
-          const fieldErrors: FormErrors = {}
-          errorData.errors.forEach((error: any) => {
-            if (error.path) {
-              fieldErrors[error.path as keyof FormErrors] = error.msg
-            }
-          })
-          setErrors(fieldErrors)
-        } else {
-          setErrors({ general: errorData.message || "Terjadi kesalahan saat mengirim request lagu" })
-        }
-        return
-      }
+      await apiClient.post('/services/song-request', formData)
 
       // Success
       setIsSuccess(true)
@@ -129,9 +102,26 @@ export function SongRequestForm({ className }: SongRequestFormProps) {
         setIsSuccess(false)
       }, 5000)
 
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error submitting song request:', error)
-      setErrors({ general: "Terjadi kesalahan jaringan. Silakan coba lagi." })
+      
+      if (isAxiosError(error) && error.response?.status === 429) {
+        setIsRateLimited(true)
+        setErrors({ general: "Anda telah mencapai batas pengiriman. Silakan coba lagi nanti." })
+        return
+      }
+      
+      if (isAxiosError(error) && error.response?.data?.errors && Array.isArray(error.response.data.errors)) {
+        const fieldErrors: FormErrors = {}
+        error.response.data.errors.forEach((err: { path: keyof FormErrors, msg: string }) => {
+          if (err.path) {
+            fieldErrors[err.path] = err.msg
+          }
+        })
+        setErrors(fieldErrors)
+      } else {
+        setErrors({ general: getErrorMessage(error, "Terjadi kesalahan saat mengirim request lagu") })
+      }
     } finally {
       setIsSubmitting(false)
     }

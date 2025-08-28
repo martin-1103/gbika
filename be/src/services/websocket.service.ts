@@ -1,4 +1,4 @@
-// WebSocketService: Manages live chat WebSocket connections and message handling
+// WebSocketService: Manages live chat WebSocket connections and message handling with rate limiting
 import WebSocket from 'ws';
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
@@ -25,6 +25,8 @@ interface Connection {
   sessionId: string;
   guestUserId: string;
   userName: string;
+  role?: 'user' | 'moderator' | 'broadcaster';
+  userId?: string;
 }
 
 interface WebSocketMessage {
@@ -57,6 +59,11 @@ interface ConnectionStats {
   }>;
 }
 
+interface SessionRateLimit {
+  lastMessageTime: number;
+  messageCount: number;
+}
+
 interface JWTPayload {
   sessionId: string;
   userId: string;
@@ -64,12 +71,22 @@ interface JWTPayload {
 
 interface ExtendedIncomingMessage extends IncomingMessage {
   session?: Session;
+  adminUser?: {
+    id: string;
+    name: string;
+    role: string;
+  };
+  connectionRole?: 'user' | 'moderator' | 'broadcaster';
 }
 
 const prisma = new PrismaClient();
 let redisClient: any | null = null;
 let redisSubscriber: any | null = null;
 let redisPublisher: any | null = null;
+
+// Rate limiting constants
+const RATE_LIMIT_WINDOW = 10000; // 10 seconds in milliseconds
+const MIN_MESSAGE_LENGTH = 50; // Minimum 50 characters
 
 // Initialize Redis clients for pub/sub
 try {
@@ -106,8 +123,9 @@ try {
   console.warn('Redis connection failed:', error.message);
 }
 
-// Store active connections
+// Store active connections and rate limiting data
 const connections = new Map<string, Connection>();
+const sessionRateLimits = new Map<string, SessionRateLimit>();
 
 class WebSocketService {
   private wss: WebSocket.Server | null = null;
@@ -118,9 +136,10 @@ class WebSocketService {
 
   // Initialize WebSocket server
   initializeServer(server: Server): void {
+    const wsPath = process.env.WS_PATH || '/livechat/ws';
     this.wss = new WebSocket.Server({
       server,
-      path: '/livechat/ws',
+      path: wsPath,
       verifyClient: (info, callback) => {
         console.log('verifyClient called');
         const { req } = info;
@@ -129,7 +148,9 @@ class WebSocketService {
 
         // Verify JWT token
         const token = url.searchParams.get('token');
+        const role = url.searchParams.get('role') || 'user';
         console.log('Extracted token:', token ? token.substring(0, 50) + '...' : 'null');
+        console.log('Connection role:', role);
         if (!token) {
           console.log('No token provided, rejecting connection');
           callback(false, 401, 'Unauthorized');
@@ -141,50 +162,87 @@ class WebSocketService {
             const jwtSecret = process.env.JWT_SECRET || 'test-secret';
             console.log('Verifying token:', token.substring(0, 50) + '...');
             console.log('Using JWT secret:', jwtSecret);
-            const decoded = jwt.verify(token, jwtSecret) as JWTPayload;
+            const decoded = jwt.verify(token, jwtSecret) as any;
             console.log('Decoded token:', decoded);
             
-            // Check if session exists and is active
-            let session: Session;
-            
-            // For testing: accept mock sessions
-            if (decoded.sessionId && decoded.sessionId.startsWith('mock-session-id-')) {
-              session = {
-                id: decoded.sessionId,
-                isActive: true,
-                guestUserId: decoded.userId,
-                guestUser: {
-                  id: decoded.userId,
-                  name: 'Test User',
-                  city: 'Test City',
-                  country: 'Test Country'
-                }
-              };
-            } else {
-              const dbSession = await prisma.session.findFirst({
-                where: {
-                  id: decoded.sessionId, // Use sessionId from token payload
-                  isActive: true,
-                  expiresAt: {
-                    gt: new Date()
-                  }
-                },
-                include: {
-                  guestUser: true
-                }
-              });
-
-              if (!dbSession) {
-                callback(false, 401, 'Invalid session');
+            // Handle different connection types based on role
+            if (role === 'moderator' || role === 'broadcaster') {
+              // Admin/moderator connections - verify user exists and has proper role
+              const userId = decoded.sub || decoded.userId || decoded.user_id || decoded.id;
+              
+              if (!userId) {
+                console.log('No userId in admin token');
+                callback(false, 401, 'Invalid admin token');
                 return;
               }
 
-              session = dbSession as Session;
-            }
+              // Verify user exists and has admin/broadcaster role
+              const user = await prisma.user.findUnique({
+                where: { id: userId }
+              });
 
-            // Attach session to request for use in handleConnection
-            (req as ExtendedIncomingMessage).session = session;
-            callback(true);
+              if (!user || (user.role !== 'admin' && user.role !== 'broadcaster' && user.role !== 'penyiar')) {
+                console.log('User not found or insufficient role:', user?.role);
+                callback(false, 403, 'Insufficient permissions');
+                return;
+              }
+
+              // Attach admin user info to request
+              (req as ExtendedIncomingMessage).adminUser = {
+                id: user.id,
+                name: user.name,
+                role: user.role
+              };
+              (req as ExtendedIncomingMessage).connectionRole = role as 'moderator' | 'broadcaster';
+              callback(true);
+            } else {
+              // Regular user connections - require session
+              const sessionId = decoded.sessionId || decoded.session_id;
+              const userId = decoded.userId || decoded.user_id;
+              
+              // Check if session exists and is active
+              let session: Session;
+              
+              // For testing: accept mock sessions
+              if (sessionId && sessionId.startsWith('mock-session-id-')) {
+                session = {
+                  id: sessionId,
+                  isActive: true,
+                  guestUserId: userId,
+                  guestUser: {
+                    id: userId,
+                    name: 'Test User',
+                    city: 'Test City',
+                    country: 'Test Country'
+                  }
+                };
+              } else {
+                const dbSession = await prisma.session.findFirst({
+                  where: {
+                    id: sessionId, // Use sessionId from token payload
+                    isActive: true,
+                    expiresAt: {
+                      gt: new Date()
+                    }
+                  },
+                  include: {
+                    guestUser: true
+                  }
+                });
+
+                if (!dbSession) {
+                  callback(false, 401, 'Invalid session');
+                  return;
+                }
+
+                session = dbSession as Session;
+              }
+
+              // Attach session to request for use in handleConnection
+              (req as ExtendedIncomingMessage).session = session;
+              (req as ExtendedIncomingMessage).connectionRole = 'user';
+              callback(true);
+            }
           } catch (error) {
             console.error('JWT verification failed:', error);
             callback(false, 401, 'Invalid token');
@@ -197,45 +255,85 @@ class WebSocketService {
       this.handleConnection(ws, req);
     });
 
-    console.log('WebSocket server initialized on /livechat/ws');
+    console.log(`WebSocket server initialized on ${wsPath}`);
   }
 
   // Handle new WebSocket connection
   private handleConnection(ws: WebSocket, req: ExtendedIncomingMessage): void {
     console.log('handleConnection called');
     
-    // Session should be attached by verifyClient
-    if (!req.session) {
-      console.log('No session found in request');
-      ws.close(1008, 'Session not found');
-      return;
-    }
-    
     const session = req.session;
-    const connectionId = `${session.id}_${Date.now()}`;
-    console.log('Creating connection with ID:', connectionId);
-    console.log('Session data:', session);
-    
-    // Store connection
-    connections.set(connectionId, {
-      ws,
-      sessionId: session.id,
-      guestUserId: session.guestUserId,
-      userName: session.guestUser.name
-    });
+    const adminUser = req.adminUser;
+    const role = req.connectionRole || 'user';
 
-    console.log('Sending connection:success event');
-    // Send connection success event
-    this.sendEvent(ws, 'connection:success', {
-      sessionId: session.id,
-      user: {
-        id: session.guestUser.id,
-        name: session.guestUser.name,
-        city: session.guestUser.city,
-        country: session.guestUser.country
+    let connection: Connection;
+    let connectionId: string;
+
+    if (role === 'moderator' || role === 'broadcaster') {
+      // Admin/moderator connection
+      if (!adminUser) {
+        console.log('No admin user found in request');
+        ws.close(1008, 'Admin user not found');
+        return;
       }
-    });
-    console.log('connection:success event sent');
+
+      connectionId = `${role}-${adminUser.id}-${Date.now()}`;
+      connection = {
+        ws,
+        sessionId: '', // Admin connections don't have sessions
+        guestUserId: '',
+        userName: adminUser.name,
+        role: role as 'moderator' | 'broadcaster',
+        userId: adminUser.id
+      };
+
+      console.log(`New ${role} connection established: ${connectionId}`);
+      
+      // Send connection success message for admin
+      this.sendEvent(ws, 'connection:success', {
+        connectionId,
+        userName: adminUser.name,
+        role: role,
+        user: {
+          id: adminUser.id,
+          name: adminUser.name
+        }
+      });
+    } else {
+      // Regular user connection
+      if (!session) {
+        console.log('No session found in request');
+        ws.close(1008, 'Session not found');
+        return;
+      }
+
+      connectionId = `${session.id}_${Date.now()}`;
+      connection = {
+        ws,
+        sessionId: session.id,
+        guestUserId: session.guestUserId,
+        userName: session.guestUser.name,
+        role: 'user'
+      };
+
+      console.log('Creating connection with ID:', connectionId);
+      console.log('Session data:', session);
+      
+      // Send connection success event for user
+      this.sendEvent(ws, 'connection:success', {
+        sessionId: session.id,
+        user: {
+          id: session.guestUser.id,
+          name: session.guestUser.name,
+          city: session.guestUser.city,
+          country: session.guestUser.country
+        }
+      });
+    }
+
+    // Store connection
+    connections.set(connectionId, connection);
+    console.log(`Active connections: ${connections.size}`);
 
     // Set up message handlers
     ws.on('message', (data: WebSocket.Data) => this.handleMessage(ws, connectionId, data));
@@ -284,6 +382,33 @@ class WebSocketService {
         });
         return;
       }
+
+      // Check minimum message length
+      if (payload.text.trim().length < MIN_MESSAGE_LENGTH) {
+        this.sendEvent(ws, 'error:invalid_payload', {
+          message: `Message must be at least ${MIN_MESSAGE_LENGTH} characters long`
+        });
+        return;
+      }
+
+      // Rate limiting check
+      const now = Date.now();
+      const sessionId = connection.sessionId;
+      const rateLimit = sessionRateLimits.get(sessionId);
+      
+      if (rateLimit && (now - rateLimit.lastMessageTime) < RATE_LIMIT_WINDOW) {
+        this.sendEvent(ws, 'error:rate_limit', {
+          message: 'Please wait before sending another message',
+          retryAfter: Math.ceil((RATE_LIMIT_WINDOW - (now - rateLimit.lastMessageTime)) / 1000)
+        });
+        return;
+      }
+
+      // Update rate limit tracking
+      sessionRateLimits.set(sessionId, {
+        lastMessageTime: now,
+        messageCount: (rateLimit?.messageCount || 0) + 1
+      });
 
       // Sanitize message text
       const sanitizedText = this.sanitizeText(payload.text);
@@ -364,6 +489,10 @@ class WebSocketService {
 
   // Handle connection disconnection
   private handleDisconnection(connectionId: string): void {
+    const connection = connections.get(connectionId);
+    if (connection && connection.sessionId) {
+      sessionRateLimits.delete(connection.sessionId);
+    }
     connections.delete(connectionId);
     console.log(`WebSocket connection closed: ${connectionId}`);
   }
@@ -376,26 +505,100 @@ class WebSocketService {
 
   // Set up Redis subscription for admin messages
   private setupRedisSubscription(): void {
+    console.log('Setting up Redis subscription...');
+    
     // Skip Redis subscription in test environment
     if (process.env.NODE_ENV === 'test') {
       console.log('Test environment - skipping Redis subscription setup');
       return;
     }
     
-    if (!redisSubscriber || !redisSubscriber.isReady) {
-      console.warn('Redis subscriber not ready - skipping subscription setup');
+    if (!redisSubscriber) {
+      console.warn('Redis subscriber not available - skipping subscription setup');
       return;
     }
-
-    redisSubscriber.subscribe('livechat:user', (message: string) => {
-      try {
-        const data: AdminMessageData = JSON.parse(message);
-        this.handleAdminMessage(data);
-      } catch (error) {
-        console.error('Error parsing Redis message:', error);
-      }
-    });
+    
+    // Wait for Redis to be ready
+    if (!redisSubscriber.isReady) {
+      console.log('Redis subscriber not ready yet, waiting...');
+      redisSubscriber.once('ready', () => {
+        console.log('Redis subscriber is now ready, setting up subscription');
+        this.setupSubscription();
+      });
+      return;
+    }
+    
+    this.setupSubscription();
   }
+  
+  // Setup the actual subscription
+   private setupSubscription(): void {
+     console.log('Setting up actual Redis subscription...');
+ 
+     // Subscribe to livechat:admin channel with callback (Redis v4+ pattern)
+     redisSubscriber.subscribe('livechat:admin', (message: string, channel: string) => {
+       try {
+         console.log(`Received message from Redis channel ${channel}:`, message);
+         const data = JSON.parse(message);
+         
+         // Handle different event types
+         switch (data.event) {
+           case 'message:new':
+             // Transform data to match frontend expectations
+             const transformedData = {
+               type: 'new_message',
+               message: {
+                 id: data.data.messageId,
+                 sessionId: data.data.sessionId,
+                 text: data.data.text,
+                 sender: data.data.sender,
+                 status: 'pending',
+                 createdAt: data.data.timestamp,
+                 updatedAt: data.data.timestamp,
+                 guestName: data.data.userName
+               }
+             };
+             this.handleUserMessageForModerators(transformedData);
+             break;
+             
+           case 'message:moderated':
+             // Transform moderation data to match frontend expectations
+             const moderationData = {
+               type: 'message_moderated',
+               message: {
+                 id: data.data.messageId,
+                 sessionId: data.data.sessionId,
+                 text: data.data.text,
+                 sender: data.data.sender,
+                 status: data.data.status,
+                 createdAt: data.data.createdAt,
+                 updatedAt: data.data.updatedAt,
+                 guestName: data.data.guestName
+               }
+             };
+             this.handleUserMessageForModerators(moderationData);
+             break;
+             
+           case 'user:typing':
+             // Handle typing indicators
+             this.handleUserMessageForModerators({
+               type: 'user_typing',
+               data: data.data
+             });
+             break;
+             
+           default:
+             console.log('Unknown event type from Redis:', data.event);
+         }
+       } catch (error) {
+         console.error('Error processing Redis message:', error);
+       }
+     }).then(() => {
+       console.log('Successfully subscribed to livechat:admin channel');
+     }).catch((error: Error) => {
+       console.error('Error subscribing to Redis channel:', error);
+     });
+   }
 
   // Handle messages from admin/broadcaster
   private async handleAdminMessage(data: AdminMessageData): Promise<void> {
@@ -427,6 +630,25 @@ class WebSocketService {
       }
     } catch (error) {
       console.error('Error handling admin message:', error);
+    }
+  }
+
+  // Handle user messages for moderators
+  private handleUserMessageForModerators(data: any): void {
+    try {
+      console.log('Sending user message to moderators:', data);
+      
+      // Send message to all moderator and broadcaster connections
+      const moderatorConnections = Array.from(connections.values())
+        .filter(conn => conn.role === 'moderator' || conn.role === 'broadcaster');
+      
+      console.log(`Found ${moderatorConnections.length} moderator/broadcaster connections`);
+      
+      moderatorConnections.forEach(conn => {
+        this.sendEvent(conn.ws, data.type, data.message || data.data);
+      });
+    } catch (error) {
+      console.error('Error handling user message for moderators:', error);
     }
   }
 
@@ -468,6 +690,7 @@ class WebSocketService {
       }
     }
     connections.clear();
+    sessionRateLimits.clear();
     
     // Close WebSocket server
     if (this.wss) {
